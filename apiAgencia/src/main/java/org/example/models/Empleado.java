@@ -1,0 +1,33 @@
+package org.example.models;
+
+import jakarta.persistence.*; // Usamos jakarta.persistence para JPA
+import lombok.Data; // Importamos Lombok
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+@Entity // Indica que esta clase es una entidad JPA y se mapea a una tabla de BD
+@Table(name = "Empleados") // Mapea a la tabla "Empleados"
+@Data // Anotación de Lombok: Genera getters, setters, toString, equals y hashCode
+@NoArgsConstructor // Lombok: Genera un constructor sin argumentos
+@AllArgsConstructor // Lombok: Genera un constructor con todos los argumentos
+public class Empleado {
+
+    @Id // Marca el campo como la clave primaria
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Generación automática de IDs (autoincrementales)
+    @Column(name = "LEGAJO") // Mapea al nombre de la columna "LEGAJO" en la BD
+    private Long legajo; // Usamos Long para IDs que pueden ser numéricos y autoincrementales
+
+    @Column(name = "NOMBRE", nullable = false) // Mapea a la columna "NOMBRE", no puede ser nulo
+    private String nombre;
+
+    @Column(name = "APELLIDO", nullable = false) // Mapea a la columna "APELLIDO", no puede ser nulo
+    private String apellido;
+
+    @Column(name = "TELEFONO_CONTACTO") // Mapea a la columna "TELEFONO_CONTACTO"
+    private String telefonoContacto;
+
+    // Puedes agregar relaciones aquí si las necesitas en esta entidad
+    // Por ejemplo, un empleado puede tener muchas pruebas asociadas
+    // @OneToMany(mappedBy = "empleado")
+    // private List<Prueba> pruebas;
+}
