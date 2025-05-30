@@ -1,9 +1,10 @@
 package org.example.models;
 
 import jakarta.persistence.*; // Usamos jakarta.persistence para JPA
-import lombok.Data; // Importamos Lombok
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity // Indica que esta clase es una entidad JPA y se mapea a una tabla de BD
 @Table(name = "Empleados") // Mapea a la tabla "Empleados"
@@ -26,8 +27,17 @@ public class Empleado {
     @Column(name = "TELEFONO_CONTACTO") // Mapea a la columna "TELEFONO_CONTACTO"
     private String telefonoContacto;
 
-    // Puedes agregar relaciones aquí si las necesitas en esta entidad
-    // Por ejemplo, un empleado puede tener muchas pruebas asociadas
-    // @OneToMany(mappedBy = "empleado")
-    // private List<Prueba> pruebas;
+    // Bidireccional en JPA , por ahora no la agrego ver si llagamos a tnesr que necesitar
+    @EqualsAndHashCode.Exclude // Excluir de equals y hashCode
+    @ToString.Exclude         // Excluir de toString para evitar bucles infinitos
+    //Ver la opcion de agregarle el cascade
+    @OneToMany(mappedBy = "empleado")
+    private Set<Prueba> pruebas = new HashSet<>();
+
+    //Constructor solo para mejorar la legibilidad
+    public Empleado(String nombre, String apellido, String telefonoContacto) {
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.telefonoContacto = telefonoContacto;
+    }
 }
