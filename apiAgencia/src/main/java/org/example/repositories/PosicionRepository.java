@@ -1,13 +1,9 @@
 package org.example.repositories;
 
+import org.example.models.Posicion;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-import java.util.Date;
-import java.util.List;
-
-public interface Posicion extends JpaRepository<Posicion, Long> {
+public interface PosicionRepository extends JpaRepository<Posicion, Long> {
     //@Query("SELECT p FROM Posicion p WHERE p.vehiculo.id = :idVehiculo AND p.fechaHora BETWEEN :inicio AND :fin")
     //List<Posicion> findByIdVehiculoAndFechaHoraBetween(@Param("idVehiculo") Integer idVehiculo,
     //                                                   @Param("inicio") Date inicio,
