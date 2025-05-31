@@ -43,14 +43,11 @@ public class Prueba {
     @Column(name = "COMENTARIOS", length = 1000)
     private String comentarios;
 
-    @Column(name = "EN_CURSO", nullable = false)
-    private Boolean enCurso;
 
     public Prueba(Vehiculo vehiculo, Interesado interesado, Empleado empleado, LocalDateTime fechaHoraInicio) {
         this.vehiculo = vehiculo;
         this.interesado = interesado;
         this.empleado = empleado;
         this.fechaHoraInicio = fechaHoraInicio;
-        this.enCurso = true;
     }
 }

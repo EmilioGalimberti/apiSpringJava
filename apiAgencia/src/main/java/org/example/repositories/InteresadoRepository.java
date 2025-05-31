@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InteresadoRepository extends JpaRepository<Interesado, Long> {
     // Puedes agregar métodos personalizados aquí, por ejemplo:
-    Interesado findByDocumento(String documento);
+    //Interesado findByDocumento(String documento);
 }
