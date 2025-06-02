@@ -1,12 +1,9 @@
 package org.example.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode; // Importar estas
-import lombok.ToString; // Importar estas
-import java.time.LocalDate;
+import lombok.*;
+
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,17 +35,17 @@ public class Interesado {
     private Boolean restringido;
 
     @Column(name = "NRO_LICENCIA")
-    private String nroLicencia;
+    private Integer nroLicencia;
 
     @Column(name = "FECHA_VENCIMIENTO_LICENCIA")
-    private LocalDate fechaVencimientoLicencia;
+    private Date fechaVencimientoLicencia;
 
     @EqualsAndHashCode.Exclude // Excluir de equals y hashCode
     @ToString.Exclude         // Excluir de toString
     @OneToMany(mappedBy = "interesado")
     private Set<Prueba> pruebas = new HashSet<>();
 
-    public Interesado(String tipoDocumento, String documento, String nombre, String apellido, Boolean restringido, String nroLicencia, LocalDate fechaVencimientoLicencia) {
+    public Interesado(String tipoDocumento, String documento, String nombre, String apellido, Boolean restringido, Integer nroLicencia, Date fechaVencimientoLicencia) {
         this.tipoDocumento = tipoDocumento;
         this.documento = documento;
         this.nombre = nombre;

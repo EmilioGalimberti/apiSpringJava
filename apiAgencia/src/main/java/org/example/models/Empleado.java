@@ -25,7 +25,7 @@ public class Empleado {
     private String apellido;
 
     @Column(name = "TELEFONO_CONTACTO") // Mapea a la columna "TELEFONO_CONTACTO"
-    private String telefonoContacto;
+    private Integer telefonoContacto;
 
     // Bidireccional en JPA , por ahora no la agrego ver si llagamos a tnesr que necesitar
     @EqualsAndHashCode.Exclude // Excluir de equals y hashCode
@@ -35,7 +35,7 @@ public class Empleado {
     private Set<Prueba> pruebas = new HashSet<>();
 
     //Constructor solo para mejorar la legibilidad
-    public Empleado(String nombre, String apellido, String telefonoContacto) {
+    public Empleado(String nombre, String apellido, Integer telefonoContacto) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.telefonoContacto = telefonoContacto;
