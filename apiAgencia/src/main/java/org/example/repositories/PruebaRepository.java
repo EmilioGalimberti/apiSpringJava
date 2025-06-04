@@ -14,8 +14,13 @@ public interface PruebaRepository extends JpaRepository<Prueba, Integer> {
         fin sean nulos, es decir, este en curso
 */
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
-            "FROM Prueba p WHERE p.vehiculo.id = ?1 AND p.fechaHoraFin IS NULL")
-    boolean existsByVehiculoIdAndFechaHoraFinIsNull(@Param("idVehiculo") Integer idVehiculo);
+            "FROM Prueba p WHERE p.vehiculo.id = :idVehiculo AND p.fechaHoraFin IS NULL")
+    boolean existePruebaActiva(@Param("idVehiculo") Integer idVehiculo);
+
+    /*
+       consulta derivada de Spring Data JPA. Basándose en el nombre del (findBy...IsNull),
+       Spring Data JPA genera automáticamente la consulta JPQL correspondiente (SELECT p FROM Prueba p WHERE p.fechaHoraFin IS NULL).
+    */
     List<Prueba> findByFechaHoraFinIsNull();
 
     /*

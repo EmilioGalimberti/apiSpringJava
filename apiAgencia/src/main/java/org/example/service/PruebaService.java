@@ -132,7 +132,7 @@ public class PruebaService {
         Vehiculo vehiculo = vehiculoRepository.findById(idVehiculo)
                 .orElseThrow(() -> new IllegalArgumentException("Vehículo no encontrado"));
         // todos los vehiculos se asumen patentados por lo que no es necesario validar la patente
-        if (pruebaRepository.existsByVehiculoIdAndFechaHoraFinIsNull(idVehiculo)) {
+        if (pruebaRepository.existePruebaActiva(idVehiculo)) {
             throw new IllegalArgumentException("El vehículo está siendo probado.");
         }
         return vehiculo;
