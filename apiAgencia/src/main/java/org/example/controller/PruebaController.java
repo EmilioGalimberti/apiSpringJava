@@ -5,10 +5,7 @@ import org.example.service.PruebaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -39,9 +36,11 @@ public class PruebaController {
     public ResponseEntity<?> crearPrueba(@RequestBody PruebaDto pruebaDTO) {
         try {
             PruebaDto nuevaPrueba = pruebaService.crearPrueba(pruebaDTO);
-            // Para cumplir estrictamente con REST, podrías incluir la URI del nuevo recurso:
+            // Devuelve una respuesta HTTP 201 (Created) al cliente.
+            // Incluye la URI del nuevo recurso creado en la cabecera 'Location'
+            // y el DTO de la prueba recién creada (convertido a JSON) en el cuerpo de la respuesta.
+            // Ejemplo cabecera Location: /api/pruebas/123
             return ResponseEntity.created(URI.create("/api/pruebas/" + nuevaPrueba.getId())).body(nuevaPrueba);
-            //return new ResponseEntity<>(nuevaPrueba, HttpStatus.CREATED);
 
         } catch (IllegalArgumentException e) {
             // Esta excepción es lanzada por PruebaService si alguna validación falla
@@ -52,4 +51,26 @@ public class PruebaController {
             return new ResponseEntity<>("Ocurrió un error inesperado al crear la prueba.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    //Endpoint para eliminar una prueba
+    /**
+     * Endpoint para eliminar una prueba por su ID.
+     *
+     * @param id El ID de la prueba a eliminar.
+     * @return ResponseEntity con estado 204 (No Content) si se elimina correctamente,
+     * o 404 (Not Found) si la prueba no existe.
+     */
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deletePrueba(@PathVariable Integer id) {
+        try {
+            pruebaService.deletePrueba(id);
+            // Si la eliminación es exitosa, devuelve un 204 No Content.
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            // Si el servicio lanza la excepción porque no encontró la prueba,
+            // devolvemos un 404 Not Found.
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

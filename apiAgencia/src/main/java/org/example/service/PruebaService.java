@@ -120,13 +120,13 @@ public class PruebaService {
         return new PruebaDto(pruebaRepository.save(pruebaEnCurso));
     }
 
-    /*
+
     public void deletePrueba(Integer id) {
         Prueba existingPrueba = pruebaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Prueba no encontrada"));
         pruebaRepository.delete(existingPrueba);
     }
-     */
+
 
     private Vehiculo validarVehiculoDisponible(Integer idVehiculo) {
         Vehiculo vehiculo = vehiculoRepository.findById(idVehiculo)
