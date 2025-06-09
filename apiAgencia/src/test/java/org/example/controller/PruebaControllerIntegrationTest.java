@@ -138,17 +138,17 @@ public class PruebaControllerIntegrationTest {
                 .andExpect(content().string("Vehículo no encontrado"));
     }
 
-//    @Test
-//    void crearNuevaPrueba_cuandoEmpleadoNoExiste_deberiaRetornar400BadRequest() throws Exception {
-//        EmpleadoDto empleadoDtoInexistente = new EmpleadoDto(-99L, "NOEXISTE", null, null); // Legajo que no existe
-//        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), empleadoDtoInexistente, new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
-//
-//        mockMvc.perform(post("/api/pruebas")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().string("Empleado no encontrado"));
-//    }
+    @Test
+    void crearNuevaPrueba_cuandoEmpleadoNoExiste_deberiaRetornar400BadRequest() throws Exception {
+        EmpleadoDto empleadoDtoInexistente = new EmpleadoDto(-99L, "NOEXISTE", null, null); // Legajo que no existe
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), empleadoDtoInexistente, new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+
+        mockMvc.perform(post("/api/pruebas/crear")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Empleado no encontrado"));
+    }
 //
 //    @Test
 //    void crearNuevaPrueba_cuandoInteresadoTieneLicenciaVencida_deberiaRetornar400BadRequest() throws Exception {
