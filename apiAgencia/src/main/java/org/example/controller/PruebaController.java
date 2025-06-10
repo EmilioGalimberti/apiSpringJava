@@ -72,5 +72,4 @@ public class PruebaController {
             return ResponseEntity.notFound().build();
         }
     }
-
 }

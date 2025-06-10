@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -98,29 +99,59 @@ public class PruebaControllerIntegrationTest {
         interesadoDePrueba = interesadoRepository.save(interesadoDePrueba);
     }
 
-//    // =================================================================
-//    // TEST DE CREACIÓN EXITOSA
-//    // =================================================================
+    // =================================================================
+    // TEST DE CREACIÓN EXITOSA
+    // =================================================================
+    @Test
+    void crearNuevaPrueba_cuandoDatosSonValidos_deberiaRetornar201CreadoConPruebaDto() throws Exception {
+        // Preparar el DTO de entrada con los datos válidos del setup
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null,
+                new VehiculoDto(vehiculoDePrueba.getId(), vehiculoDePrueba.getPatente(), null),
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), empleadoDePrueba.getNombre(), empleadoDePrueba.getApellido(), empleadoDePrueba.getTelefonoContacto()),
+                new InteresadoDto(interesadoDePrueba.getId(), interesadoDePrueba.getTipoDocumento(), interesadoDePrueba.getDocumento(), interesadoDePrueba.getNombre(), interesadoDePrueba.getApellido(), interesadoDePrueba.getRestringido(), interesadoDePrueba.getNroLicencia(), interesadoDePrueba.getFechaVencimientoLicencia()),
+                null, null, null);
+
+        // Ejecutar la solicitud POST y verificar las expectativas
+        mockMvc.perform(post("/api/pruebas/crear")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.vehiculo.id").value(vehiculoDePrueba.getId()))
+                .andExpect(jsonPath("$.empleado.legajo").value(empleadoDePrueba.getLegajo()))
+                .andExpect(jsonPath("$.interesado.id").value(interesadoDePrueba.getId()));
+    }
+
+    // =================================================================
+    // TEST PARA ERROR INESPERADO DEL SERVIDOR (500)
+    // =================================================================
+
 //    @Test
-//    void crearNuevaPrueba_cuandoDatosSonValidos_deberiaRetornar201CreadoConPruebaDto() throws Exception {
-//        // Preparar el DTO de entrada con los datos válidos del setup
-//        PruebaDto pruebaDtoParaCrear = new PruebaDto(null,
-//                new VehiculoDto(vehiculoDePrueba.getId(), vehiculoDePrueba.getPatente(), null),
-//                new EmpleadoDto(empleadoDePrueba.getLegajo(), empleadoDePrueba.getNombre(), empleadoDePrueba.getApellido(), empleadoDePrueba.getTelefonoContacto()),
-//                new InteresadoDto(interesadoDePrueba.getId(), interesadoDePrueba.getTipoDocumento(), interesadoDePrueba.getDocumento(), interesadoDePrueba.getNombre(), interesadoDePrueba.getApellido(), interesadoDePrueba.getRestringido(), interesadoDePrueba.getNroLicencia(), interesadoDePrueba.getFechaVencimientoLicencia()),
+//    void crearNuevaPrueba_cuandoServicioFallaInesperadamente_deberiaRetornar500() throws Exception {
+//        // 1. PREPARAR LA SIMULACIÓN (Arrange)
+//        // Configuramos nuestro servicio simulado para que lance una RuntimeException
+//        // (un error inesperado) cada vez que se llame a su méthod crearPrueba.
+//        // Usamos 'any(PruebaDto.class)' para que coincida con cualquier objeto PruebaDto que se le pase.
+//        when(pruebaService.crearPrueba(any(PruebaDto.class)))
+//                .thenThrow(new RuntimeException("Error simulado de base de datos!"));
+//
+//        // Preparamos un DTO válido para enviar en el cuerpo de la solicitud.
+//        // No importa qué datos tenga, porque el servicio simulado siempre lanzará el error.
+//        PruebaDto pruebaDtoValido = new PruebaDto(null,
+//                new VehiculoDto(vehiculoDePrueba.getId(), null, null),
+//                new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null),
+//                new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null),
 //                null, null, null);
 //
-//        // Ejecutar la solicitud POST y verificar las expectativas
-//        mockMvc.perform(post("/api/pruebas")
+//        // 2. EJECUTAR Y VERIFICAR (Act & Assert)
+//        mockMvc.perform(post("/api/pruebas/crear") // Asegúrate que la ruta sea correcta
 //                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
-//                .andExpect(status().isCreated())
-//                .andExpect(header().exists("Location"))
-//                .andExpect(jsonPath("$.id").exists())
-//                .andExpect(jsonPath("$.vehiculo.id").value(vehiculoDePrueba.getId()))
-//                .andExpect(jsonPath("$.empleado.legajo").value(empleadoDePrueba.getLegajo()))
-//                .andExpect(jsonPath("$.interesado.id").value(interesadoDePrueba.getId()));
+//                        .content(objectMapper.writeValueAsString(pruebaDtoValido)))
+//                .andExpect(status().isInternalServerError()) // Verificamos que el estado sea 500
+//                .andExpect(content().string("Ocurrió un error inesperado al crear la prueba."));
 //    }
+
 
     // =================================================================
     // TESTS PARA VALIDACIONES DE ERRORES
@@ -149,79 +180,96 @@ public class PruebaControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Empleado no encontrado"));
     }
-//
-//    @Test
-//    void crearNuevaPrueba_cuandoInteresadoTieneLicenciaVencida_deberiaRetornar400BadRequest() throws Exception {
-//        // Creamos un interesado específico para este test con licencia vencida
-//        Date fechaVencida = new Date(System.currentTimeMillis() - 86400000L); // Fecha de ayer
-//        Interesado interesadoVencido = new Interesado("DNI", "VENCIDO" + System.currentTimeMillis(), "Licencia", "Vencida", false, 67890, fechaVencida);
-//        interesadoVencido = interesadoRepository.save(interesadoVencido);
-//        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoVencido.getId(), null, null, null, null, null, null, null), null, null, null);
-//
-//        mockMvc.perform(post("/api/pruebas")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().string("La licencia del interesado está vencida."));
-//    }
-//
-//    @Test
-//    void crearNuevaPrueba_cuandoInteresadoEstaRestringido_deberiaRetornar400BadRequest() throws Exception {
-//        // El interesado del setup ya tiene 'restringido' en false, lo actualizamos para este test.
-//        interesadoDePrueba.setRestringido(true);
-//        interesadoRepository.save(interesadoDePrueba);
-//        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
-//
-//        mockMvc.perform(post("/api/pruebas")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().string("El interesado está restringido para probar vehículos."));
-//    }
-//
-//    @Test
-//    void crearNuevaPrueba_cuandoVehiculoYaEstaEnPrueba_deberiaRetornar400BadRequest() throws Exception {
-//        // 1. Creamos una prueba válida para nuestro vehículo, simulando que ya está en curso.
-//        pruebaService.crearPrueba(new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null));
-//
-//        // 2. Ahora, intentamos crear OTRA prueba con el MISMO vehículo.
-//        PruebaDto pruebaDuplicadaDto = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
-//
-//        mockMvc.perform(post("/api/pruebas")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(pruebaDuplicadaDto)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().string("El vehículo está siendo probado."));
-//    }
-//
-//    // =================================================================
-//    // TEST COMPLEJO DE CREAR Y LUEGO BORRAR
-//    // =================================================================
-//
-//    @Test
-//    void crearYLuegoBorrarPrueba_deberiaCompletarCicloExitosamente() throws Exception {
-//        // 1. PREPARAR DATOS PARA CREAR (usamos los datos válidos del setup)
-//        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
-//
-//        // 2. EJECUTAR CREACIÓN Y OBTENER ID
-//        MvcResult resultCreacion = mockMvc.perform(post("/api/pruebas")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
-//                .andExpect(status().isCreated())
-//                .andReturn();
-//
-//        // Extraer el ID de la prueba recién creada desde el cuerpo de la respuesta JSON
-//        String responseBody = resultCreacion.getResponse().getContentAsString();
-//        PruebaDto pruebaCreada = objectMapper.readValue(responseBody, PruebaDto.class);
-//        Integer idPruebaCreada = pruebaCreada.getId();
-//
-//        // 3. EJECUTAR BORRADO
-//        mockMvc.perform(delete("/api/pruebas/" + idPruebaCreada))
-//                .andExpect(status().isNoContent());
-//
+
+    @Test
+    void crearNuevaPrueba_cuandoInteresadoTieneLicenciaVencida_deberiaRetornar400BadRequest() throws Exception {
+        // Creamos un interesado específico para este test con licencia vencida
+        Date fechaVencida = new Date(System.currentTimeMillis() - 86400000L); // Fecha de ayer
+        Interesado interesadoVencido = new Interesado("DNI", "VENCIDO" + System.currentTimeMillis(), "Licencia", "Vencida", false, 67890, fechaVencida);
+        interesadoVencido = interesadoRepository.save(interesadoVencido);
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoVencido.getId(), null, null, null, null, null, null, null), null, null, null);
+
+        mockMvc.perform(post("/api/pruebas/crear")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("La licencia del interesado está vencida."));
+    }
+
+    @Test
+    void crearNuevaPrueba_cuandoInteresadoEstaRestringido_deberiaRetornar400BadRequest() throws Exception {
+        // El interesado del setup ya tiene 'restringido' en false, lo actualizamos para este test.
+        interesadoDePrueba.setRestringido(true);
+        interesadoRepository.save(interesadoDePrueba);
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+
+        mockMvc.perform(post("/api/pruebas/crear")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("El interesado está restringido para probar vehículos."));
+    }
+
+    @Test
+    void crearNuevaPrueba_cuandoVehiculoYaEstaEnPrueba_deberiaRetornar400BadRequest() throws Exception {
+        // 1. Creamos una prueba válida para nuestro vehículo, simulando que ya está en curso.
+        pruebaService.crearPrueba(new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null));
+
+        // 2. Ahora, intentamos crear OTRA prueba con el MISMO vehículo.
+        PruebaDto pruebaDuplicadaDto = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+
+        mockMvc.perform(post("/api/pruebas/crear")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pruebaDuplicadaDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("El vehículo está siendo probado."));
+    }
+
+    // =================================================================
+    // TEST COMPLEJO DE CREAR Y LUEGO BORRAR
+    // =================================================================
+
+    @Test
+    void crearYLuegoBorrarPrueba_deberiaCompletarCicloExitosamente() throws Exception {
+        // 1. PREPARAR DATOS PARA CREAR (usamos los datos válidos del setup)
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+
+        // 2. EJECUTAR CREACIÓN Y OBTENER ID
+        MvcResult resultCreacion = mockMvc.perform(post("/api/pruebas/crear")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pruebaDtoParaCrear)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        // Extraer el ID de la prueba recién creada desde el cuerpo de la respuesta JSON
+        String responseBody = resultCreacion.getResponse().getContentAsString();
+        PruebaDto pruebaCreada = objectMapper.readValue(responseBody, PruebaDto.class);
+        Integer idPruebaCreada = pruebaCreada.getId();
+
+        // 3. EJECUTAR BORRADO
+        mockMvc.perform(delete("/api/pruebas/delete/" + idPruebaCreada))
+                .andExpect(status().isNoContent());
+
 //        // 4. (OPCIONAL PERO RECOMENDADO) VERIFICAR QUE YA NO EXISTE
 //        // Si intentamos borrarla de nuevo, debería darnos 404 Not Found
 //        mockMvc.perform(delete("/api/pruebas/" + idPruebaCreada))
 //                .andExpect(status().isNotFound());
-//    }
+    }
+
+    // =================================================================
+    // TEST PARA CASO DE BORRADO NO ENCONTRADO
+    // =================================================================
+
+    @Test
+    void deletePrueba_cuandoIdNoExiste_deberiaRetornar404NotFound() throws Exception {
+        // 1. PREPARAR DATOS
+        // Definimos un ID que es muy improbable que exista en la base de datos.
+        Integer idInexistente = -999;
+
+        // 2. EJECUTAR Y VERIFICAR
+        // Realizamos la petición DELETE a la URL con el ID inexistente
+        // y esperamos que el estado de la respuesta sea 404 Not Found.
+        mockMvc.perform(delete("/api/pruebas/delete/" + idInexistente))
+                .andExpect(status().isNotFound());
+    }
 }
