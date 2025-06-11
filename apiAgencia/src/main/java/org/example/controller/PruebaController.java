@@ -85,4 +85,30 @@ public class PruebaController {
 
         return ResponseEntity.ok(pruebas);
     }
+
+    //endpoint para finalizar prueba, c)
+    /**
+     * Endpoint para finalizar una prueba en curso.
+     * Establece la fecha y hora de fin y agrega un comentario.
+     *
+     * @param id         El ID de la prueba a finalizar, obtenido de la ruta (path).
+     * @param comentario El comentario a agregar, obtenido de los parámetros de la solicitud.
+     * @return ResponseEntity con la PruebaDto actualizada y estado 200 (OK),
+     * o un estado de error si la prueba no se encuentra o ya estaba finalizada.
+     */
+    @PatchMapping("/{id}/finalizar")
+    public ResponseEntity<?> finalizarPrueba(@PathVariable Integer id, @RequestParam String comentario) {
+        try {
+            PruebaDto pruebaActualizada = pruebaService.finalizarPrueba(id, comentario);
+            return ResponseEntity.ok(pruebaActualizada);
+        } catch (IllegalArgumentException e) {
+            // Si la prueba no se encuentra, el servicio lanza IllegalArgumentException.
+            // Lo traducimos a un 404 Not Found si el mensaje lo indica.
+            if (e.getMessage().contains("no encontrada")) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            }
+            // Si la prueba ya estaba finalizada, devolvemos un 400 Bad Request.
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

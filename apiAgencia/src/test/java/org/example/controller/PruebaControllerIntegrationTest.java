@@ -319,4 +319,54 @@ public class PruebaControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].comentarios").isEmpty()) // Verificamos que los comentarios estén vacíos/nulos
                 .andExpect(jsonPath("$[0].fechaHoraFin").isEmpty()); // Y que la fecha de fin sea nula
     }
+
+    // =================================================================
+    // TESTS PARA PATCH /api/pruebas/{id}/finalizar
+    // =================================================================
+
+    @Test
+    void finalizarPrueba_cuandoPruebaExisteYEstaEnCurso_deberiaRetornar200OkConPruebaActualizada() throws Exception {
+        // 1. Arrange: Creamos una prueba "en curso" en la BD.
+        Prueba pruebaEnCurso = new Prueba(null, vehiculoDePrueba,interesadoDePrueba , empleadoDePrueba, new Date(), null, null);
+        pruebaEnCurso = pruebaRepository.save(pruebaEnCurso);
+        String comentario = "El cliente quedó muy satisfecho con el rendimiento.";
+
+        // 2. Act & Assert: Realizamos la petición PATCH y verificamos la respuesta.
+        mockMvc.perform(patch("/api/pruebas/{id}/finalizar", pruebaEnCurso.getId())
+                        .param("comentario", comentario) // Añadimos el comentario como parámetro
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()) // Esperamos 200 OK
+                .andExpect(jsonPath("$.id").value(pruebaEnCurso.getId()))
+                .andExpect(jsonPath("$.fechaHoraFin").isNotEmpty()) // Verificamos que la fecha de fin ya no es nula
+                .andExpect(jsonPath("$.comentarios").value(comentario)); // Verificamos que el comentario se guardó
+    }
+
+    @Test
+    void finalizarPrueba_cuandoPruebaNoExiste_deberiaRetornar404NotFound() throws Exception {
+        // 1. Arrange: Un ID inexistente y un comentario.
+        Integer idInexistente = -999;
+        String comentario = "Este test no debería funcionar.";
+
+        // 2. Act & Assert: Realizamos la petición PATCH y esperamos un 404.
+        mockMvc.perform(patch("/api/pruebas/{id}/finalizar", idInexistente)
+                        .param("comentario", comentario)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound()) // Esperamos 404 Not Found
+                .andExpect(content().string("Prueba no encontrada"));
+    }
+
+    @Test
+    void finalizarPrueba_cuandoPruebaYaEstaFinalizada_deberiaRetornar400BadRequest() throws Exception {
+        // 1. Arrange: Creamos una prueba que YA tiene una fecha de fin.
+        Prueba pruebaYaFinalizada = new Prueba(null, vehiculoDePrueba, interesadoDePrueba , empleadoDePrueba, new Date(), new Date(), "Prueba finalizada previamente.");
+        pruebaYaFinalizada = pruebaRepository.save(pruebaYaFinalizada);
+        String nuevoComentario = "Intentando finalizar de nuevo.";
+
+        // 2. Act & Assert: Realizamos la petición PATCH y esperamos un 400.
+        mockMvc.perform(patch("/api/pruebas/{id}/finalizar", pruebaYaFinalizada.getId())
+                        .param("comentario", nuevoComentario)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest()) // Esperamos 400 Bad Request
+                .andExpect(content().string("La prueba ya ha sido finalizada."));
+    }
 }
