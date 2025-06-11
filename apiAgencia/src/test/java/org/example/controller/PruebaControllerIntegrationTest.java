@@ -6,11 +6,7 @@ import org.example.dtos.InteresadoDto;
 import org.example.dtos.PruebaDto;
 import org.example.dtos.VehiculoDto;
 import org.example.models.*;
-import org.example.repositories.EmpleadoRepository;
-import org.example.repositories.InteresadoRepository;
-import org.example.repositories.VehiculoRepository;
-import org.example.repositories.MarcaRepository;
-import org.example.repositories.ModeloRepository;
+import org.example.repositories.*;
 import org.example.service.PruebaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -39,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Main.class) // Especifica la clase principal para asegurar que se cargue la configuración correcta
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
 public class PruebaControllerIntegrationTest {
 
     @Autowired
@@ -60,6 +57,8 @@ public class PruebaControllerIntegrationTest {
     private MarcaRepository marcaRepository;
     @Autowired
     private ModeloRepository modeloRepository;
+    @Autowired
+    private PruebaRepository pruebaRepository;
 
     // Entidades de prueba que se reiniciarán antes de cada test
     private Vehiculo vehiculoDePrueba;
@@ -271,5 +270,53 @@ public class PruebaControllerIntegrationTest {
         // y esperamos que el estado de la respuesta sea 404 Not Found.
         mockMvc.perform(delete("/api/pruebas/delete/" + idInexistente))
                 .andExpect(status().isNotFound());
+    }
+
+    // =================================================================
+    // TESTS PARA GET /api/pruebas/en-curso
+    // =================================================================
+
+    /**
+     * Prueba el caso donde no hay ninguna prueba en curso en la base de datos.
+     * Debería devolver un estado 204 No Content.
+     */
+    @Test
+    void getPruebasEnCurso_cuandoNoHayPruebas_deberiaRetornar204NoContent() throws Exception {
+        // 1. PREPARAR DATOS (Arrange)
+        // No se necesita preparación. Gracias a @Transactional, la base de datos está limpia
+        // antes de este test, por lo que no hay pruebas en curso.
+
+        // 2. EJECUTAR Y VERIFICAR (Act & Assert)
+        mockMvc.perform(get("/api/pruebas/en-curso")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent()); // Esperamos 204 No Content
+    }
+
+    /**
+     * Prueba el caso donde sí existen pruebas en curso.
+     * Debería devolver un estado 200 OK y una lista con las pruebas.
+     */
+    @Test
+    void getPruebasEnCurso_cuandoExistenPruebas_deberiaRetornar200OkConListaDePruebas() throws Exception {
+        // 1. PREPARAR DATOS (Arrange)
+        // Creamos una prueba directamente en la base de datos que esté "en curso"
+        // (es decir, con fechaHoraFin nula). Usamos las entidades creadas en el @BeforeEach.
+        Prueba pruebaEnCurso = new Prueba();
+        pruebaEnCurso.setVehiculo(vehiculoDePrueba);
+        pruebaEnCurso.setEmpleado(empleadoDePrueba);
+        pruebaEnCurso.setInteresado(interesadoDePrueba);
+        pruebaEnCurso.setFechaHoraInicio(new Date());
+        pruebaEnCurso.setFechaHoraFin(null); // <-- Clave: esto la marca como "en curso"
+        pruebaRepository.save(pruebaEnCurso);
+
+        // 2. EJECUTAR Y VERIFICAR (Act & Assert)
+        mockMvc.perform(get("/api/pruebas/en-curso")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()) // Esperamos 200 OK
+                .andExpect(jsonPath("$").isArray()) // El cuerpo debe ser un array JSON
+                .andExpect(jsonPath("$.length()").value(1)) // El array debe tener 1 elemento
+                .andExpect(jsonPath("$[0].id").value(pruebaEnCurso.getId())) // Verificamos el ID de la prueba
+                .andExpect(jsonPath("$[0].comentarios").isEmpty()) // Verificamos que los comentarios estén vacíos/nulos
+                .andExpect(jsonPath("$[0].fechaHoraFin").isEmpty()); // Y que la fecha de fin sea nula
     }
 }

@@ -47,7 +47,6 @@ public class PruebaService {
         Prueba savedPrueba = pruebaRepository.save(nuevaPrueba);
 
         // 5. Devolver el DTO de la prueba creada
-        // esto revisar la verdad ni idea asjdhajshd
         return new PruebaDto(savedPrueba);
     }
 

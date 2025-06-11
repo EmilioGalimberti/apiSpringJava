@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/pruebas")
@@ -71,5 +72,17 @@ public class PruebaController {
             // devolvemos un 404 Not Found.
             return ResponseEntity.notFound().build();
         }
+    }
+
+    //endponint para obtener pruebas en curso b)
+    @GetMapping("/en-curso")
+    public ResponseEntity<List<PruebaDto>> getPruebasEnCurso() {
+        List<PruebaDto> pruebas = pruebaService.getPruebasEnCurso();
+
+        if (pruebas.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(pruebas);
     }
 }
