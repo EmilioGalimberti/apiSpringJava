@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @Service
 public class PruebaService {
@@ -58,12 +59,12 @@ public class PruebaService {
     }
      */
 
-    /*
+
     public Iterable<PruebaDto> findAll() {
         Iterable<Prueba> pruebas = pruebaRepository.findAll();
         return StreamSupport.stream(pruebas.spliterator(), false).map(PruebaDto::new).toList();
     }
-    */
+
 
 
 

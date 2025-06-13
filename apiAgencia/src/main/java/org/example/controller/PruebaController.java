@@ -21,6 +21,12 @@ public class PruebaController {
         this.pruebaService = pruebaService;
     }
 
+    // Obtener todas las pruebas, para el front
+    @GetMapping
+    public ResponseEntity<Iterable<PruebaDto>> getAllPruebas() {
+        return ResponseEntity.ok(pruebaService.findAll());
+    }
+
     // crear una prueba  | Punto A)
     /**
      * Endpoint para crear una nueva prueba.
