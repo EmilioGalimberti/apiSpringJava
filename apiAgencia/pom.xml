@@ -67,6 +67,17 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <!-- Para usar WebFlux , y hacer pedidos a otras api de forma asincrona a diff de RestTemplate-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
         <!--Base de datos para tests-->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -105,6 +116,17 @@
                     <goals>
                         <goal>report</goal>
                     </goals>
+                    <configuration>
+                        <excludes>
+                            <exclude>org/example/dtos/*.class</exclude>
+
+                            <exclude>org/example/models/*.class</exclude>
+
+                            <exclude>org/example/repositories/*.class</exclude>
+
+                            <exclude>org/example/Main.class</exclude>
+                        </excludes>
+                    </configuration>
                 </execution>
             </executions>
             </plugin>
