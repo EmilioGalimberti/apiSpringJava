@@ -118,7 +118,8 @@
                     </goals>
                     <configuration>
                         <excludes>
-                            <exclude>org/example/dtos/*.class</exclude>
+                            <exclude>org/example/dtos/*</exclude>
+                            <exclude>org/example/dtos/externos/*</exclude>
 
                             <exclude>org/example/models/*.class</exclude>
 

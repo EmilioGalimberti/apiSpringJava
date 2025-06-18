@@ -98,6 +98,50 @@ public class PruebaControllerIntegrationTest {
         interesadoDePrueba = interesadoRepository.save(interesadoDePrueba);
     }
 
+    //Test get Obtener todas las pruebas
+    /**
+     * Prueba que el endpoint GET /api/pruebas devuelva una lista vacía
+     * cuando no hay ninguna prueba en la base de datos.
+     */
+    @Test
+    void getAllPruebas_cuandoNoHayPruebas_deberiaRetornar200OkConListaVacia() throws Exception {
+        // 1. Arrange (Preparar)
+        // No necesitamos hacer nada. Gracias a @Transactional, la base de datos está limpia
+        // para este test.
+
+        // 2. Act & 3. Assert (Actuar y Verificar)
+        mockMvc.perform(get("/api/pruebas") // Hacemos la petición GET al endpoint base del controlador
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()) // Esperamos un código de estado 200 OK
+                .andExpect(jsonPath("$").isArray()) // Verificamos que el cuerpo de la respuesta sea un array JSON
+                .andExpect(jsonPath("$.length()").value(0)); // Verificamos que el array esté vacío
+    }
+
+    /**
+     * Prueba que el endpoint GET /api/pruebas devuelva una lista con las pruebas
+     * existentes en la base de datos.
+     */
+    @Test
+    void getAllPruebas_cuandoExistenPruebas_deberiaRetornar200OkConListaDePruebas() throws Exception {
+        // 1. Arrange (Preparar)
+        // Usamos las entidades creadas en el método @BeforeEach para crear dos pruebas.
+        // La anotación @Transactional se encargará de limpiar esto después del test.
+        Prueba prueba1 = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba, new Date(), null, "Comentarios prueba 1");
+        Prueba prueba2 = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba, new Date(), new Date(), "Comentarios prueba 2 finalizada");
+        pruebaRepository.save(prueba1);
+        pruebaRepository.save(prueba2);
+
+        // 2. Act & 3. Assert (Actuar y Verificar)
+        mockMvc.perform(get("/api/pruebas")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2)) // Verificamos que el array ahora contenga 2 elementos
+                .andExpect(jsonPath("$[0].comentarios").value("Comentarios prueba 1")) // Verificamos un campo de la primera prueba
+                .andExpect(jsonPath("$[1].comentarios").value("Comentarios prueba 2 finalizada")); // Verificamos un campo de la segunda
+    }
+
+
     // =================================================================
     // TEST DE CREACIÓN EXITOSA
     // =================================================================
