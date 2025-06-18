@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "Posiciones")
@@ -16,14 +16,14 @@ public class Posicion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "ID_VEHICULO", nullable = false)
     private Vehiculo vehiculo;
 
     @Column(name = "FECHA_HORA", nullable = false)
-    private LocalDateTime fechaHora;
+    private Date fechaHora;
 
     @Column(name = "LATITUD", nullable = false)
     private Double latitud;

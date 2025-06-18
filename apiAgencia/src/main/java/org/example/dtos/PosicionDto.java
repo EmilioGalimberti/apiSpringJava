@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PosicionDto {
-    private int id;
+    private Integer id;
     private VehiculoDto vehiculo;
     private Coordenadas coordenadas;
     private String mensaje;
