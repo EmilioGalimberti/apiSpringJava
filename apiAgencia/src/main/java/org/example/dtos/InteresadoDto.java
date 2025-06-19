@@ -2,11 +2,13 @@ package org.example.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.example.models.Interesado;
 
 import java.util.Date;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class InteresadoDto {
     private Long id;

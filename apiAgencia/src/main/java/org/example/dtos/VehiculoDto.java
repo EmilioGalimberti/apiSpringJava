@@ -2,9 +2,11 @@ package org.example.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.example.models.Vehiculo;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class VehiculoDto {
     private Integer id;

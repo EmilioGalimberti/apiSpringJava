@@ -2,9 +2,11 @@ package org.example.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.example.models.Empleado;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class EmpleadoDto {
     private Long legajo;
