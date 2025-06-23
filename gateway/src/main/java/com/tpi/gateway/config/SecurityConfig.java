@@ -36,13 +36,14 @@ public class SecurityConfig {
 
                         // --- Tus reglas de negocio ---
                         // EMPLEADO
+                        .pathMatchers("/api/pruebas").hasRole("EMPLEADO")
+                        .pathMatchers("/api/pruebas/**").hasRole("EMPLEADO")
                         .pathMatchers(HttpMethod.POST, "/api/pruebas/crear").hasRole("EMPLEADO")
                         .pathMatchers(HttpMethod.PATCH, "/api/pruebas/*/finalizar").hasRole("EMPLEADO")
                         .pathMatchers(HttpMethod.GET, "/api/pruebas/en-curso").hasRole("EMPLEADO")
                         .pathMatchers(HttpMethod.POST, "/api/notificaciones/**").hasRole("EMPLEADO")
                         .pathMatchers("/api/crud/vehiculos/**").hasRole("EMPLEADO")
                         .pathMatchers("/api/crud/modelos/**").hasRole("EMPLEADO")
-                        .pathMatchers("/api/empleados/**").hasRole("EMPLEADO")
                         .pathMatchers("/api/interesados/**").hasRole("EMPLEADO")
 
                         // VEHICULO
@@ -51,7 +52,7 @@ public class SecurityConfig {
 
                         // ADMIN
                         .pathMatchers("/api/reportes/**").hasRole("ADMIN")
-
+                        .pathMatchers("/api/**").hasRole("ADMIN")
                         // REGLA FINAL Y ESTRICTA: Denegar cualquier otra petición.
                         .anyExchange().denyAll()
                 )
