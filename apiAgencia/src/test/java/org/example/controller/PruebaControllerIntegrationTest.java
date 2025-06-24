@@ -1,4 +1,5 @@
 package org.example.controller;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Main;
 import org.example.dtos.EmpleadoDto;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,18 +23,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
-
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 /**
  * Clase de Pruebas de Integración para PruebaController.
+ *
  * @SpringBootTest carga el contexto completo de la aplicación Spring.
  * @AutoConfigureMockMvc configura MockMvc para simular peticiones HTTP.
  * @Transactional asegura que la base de datos se revierta a su estado original después de cada test.
  */
-@SpringBootTest(classes = Main.class) // Especifica la clase principal para asegurar que se cargue la configuración correcta
+@SpringBootTest(classes = Main.class)
+// Especifica la clase principal para asegurar que se cargue la configuración correcta
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
@@ -94,11 +98,13 @@ public class PruebaControllerIntegrationTest {
         empleadoDePrueba = empleadoRepository.save(empleadoDePrueba);
 
         Date fechaLicenciaVigente = new Date(System.currentTimeMillis() + 86400000L * 30);
-        interesadoDePrueba = new Interesado("DNI", "VALIDO" + System.currentTimeMillis(), "Interesado", "Valido", false, 12345, fechaLicenciaVigente);
+        interesadoDePrueba = new Interesado("DNI", "VALIDO" + System.currentTimeMillis(), "Interesado", "Valido",
+                false, 12345, fechaLicenciaVigente);
         interesadoDePrueba = interesadoRepository.save(interesadoDePrueba);
     }
 
     //Test get Obtener todas las pruebas
+
     /**
      * Prueba que el endpoint GET /api/pruebas devuelva una lista vacía
      * cuando no hay ninguna prueba en la base de datos.
@@ -126,8 +132,10 @@ public class PruebaControllerIntegrationTest {
         // 1. Arrange (Preparar)
         // Usamos las entidades creadas en el método @BeforeEach para crear dos pruebas.
         // La anotación @Transactional se encargará de limpiar esto después del test.
-        Prueba prueba1 = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba, new Date(), null, "Comentarios prueba 1");
-        Prueba prueba2 = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba, new Date(), new Date(), "Comentarios prueba 2 finalizada");
+        Prueba prueba1 = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba, new Date(), null,
+                "Comentarios prueba 1", false);
+        Prueba prueba2 = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba, new Date(),
+                new Date(), "Comentarios prueba 2 finalizada", false);
         pruebaRepository.save(prueba1);
         pruebaRepository.save(prueba2);
 
@@ -137,8 +145,10 @@ public class PruebaControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2)) // Verificamos que el array ahora contenga 2 elementos
-                .andExpect(jsonPath("$[0].comentarios").value("Comentarios prueba 1")) // Verificamos un campo de la primera prueba
-                .andExpect(jsonPath("$[1].comentarios").value("Comentarios prueba 2 finalizada")); // Verificamos un campo de la segunda
+                .andExpect(jsonPath("$[0].comentarios").value("Comentarios prueba 1")) // Verificamos un campo de la
+                // primera prueba
+                .andExpect(jsonPath("$[1].comentarios").value("Comentarios prueba 2 finalizada")); // Verificamos un
+        // campo de la segunda
     }
 
 
@@ -150,9 +160,13 @@ public class PruebaControllerIntegrationTest {
         // Preparar el DTO de entrada con los datos válidos del setup
         PruebaDto pruebaDtoParaCrear = new PruebaDto(null,
                 new VehiculoDto(vehiculoDePrueba.getId(), vehiculoDePrueba.getPatente(), null),
-                new EmpleadoDto(empleadoDePrueba.getLegajo(), empleadoDePrueba.getNombre(), empleadoDePrueba.getApellido(), empleadoDePrueba.getTelefonoContacto()),
-                new InteresadoDto(interesadoDePrueba.getId(), interesadoDePrueba.getTipoDocumento(), interesadoDePrueba.getDocumento(), interesadoDePrueba.getNombre(), interesadoDePrueba.getApellido(), interesadoDePrueba.getRestringido(), interesadoDePrueba.getNroLicencia(), interesadoDePrueba.getFechaVencimientoLicencia()),
-                null, null, null);
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), empleadoDePrueba.getNombre(),
+                        empleadoDePrueba.getApellido(), empleadoDePrueba.getTelefonoContacto()),
+                new InteresadoDto(interesadoDePrueba.getId(), interesadoDePrueba.getTipoDocumento(),
+                        interesadoDePrueba.getDocumento(), interesadoDePrueba.getNombre(),
+                        interesadoDePrueba.getApellido(), interesadoDePrueba.getRestringido(),
+                        interesadoDePrueba.getNroLicencia(), interesadoDePrueba.getFechaVencimientoLicencia()),
+                null, null, null, null);
 
         // Ejecutar la solicitud POST y verificar las expectativas
         mockMvc.perform(post("/api/pruebas/crear")
@@ -203,7 +217,10 @@ public class PruebaControllerIntegrationTest {
     @Test
     void crearNuevaPrueba_cuandoVehiculoNoExiste_deberiaRetornar400BadRequest() throws Exception {
         VehiculoDto vehiculoDtoInexistente = new VehiculoDto(-99, "NOEXISTE", 2L); // ID que no existe
-        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, vehiculoDtoInexistente, new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, vehiculoDtoInexistente,
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null),
+                new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null,
+                null, null);
 
         mockMvc.perform(post("/api/pruebas/crear")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -215,7 +232,9 @@ public class PruebaControllerIntegrationTest {
     @Test
     void crearNuevaPrueba_cuandoEmpleadoNoExiste_deberiaRetornar400BadRequest() throws Exception {
         EmpleadoDto empleadoDtoInexistente = new EmpleadoDto(-99L, "NOEXISTE", null, null); // Legajo que no existe
-        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), empleadoDtoInexistente, new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null),
+                empleadoDtoInexistente, new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null,
+                null, null), null, null, null, null);
 
         mockMvc.perform(post("/api/pruebas/crear")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -228,9 +247,13 @@ public class PruebaControllerIntegrationTest {
     void crearNuevaPrueba_cuandoInteresadoTieneLicenciaVencida_deberiaRetornar400BadRequest() throws Exception {
         // Creamos un interesado específico para este test con licencia vencida
         Date fechaVencida = new Date(System.currentTimeMillis() - 86400000L); // Fecha de ayer
-        Interesado interesadoVencido = new Interesado("DNI", "VENCIDO" + System.currentTimeMillis(), "Licencia", "Vencida", false, 67890, fechaVencida);
+        Interesado interesadoVencido = new Interesado("DNI", "VENCIDO" + System.currentTimeMillis(), "Licencia",
+                "Vencida", false, 67890, fechaVencida);
         interesadoVencido = interesadoRepository.save(interesadoVencido);
-        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoVencido.getId(), null, null, null, null, null, null, null), null, null, null);
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null),
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null),
+                new InteresadoDto(interesadoVencido.getId(), null, null, null, null, null, null, null), null, null,
+                null, null);
 
         mockMvc.perform(post("/api/pruebas/crear")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -244,7 +267,10 @@ public class PruebaControllerIntegrationTest {
         // El interesado del setup ya tiene 'restringido' en false, lo actualizamos para este test.
         interesadoDePrueba.setRestringido(true);
         interesadoRepository.save(interesadoDePrueba);
-        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null),
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null),
+                new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null,
+                null, null);
 
         mockMvc.perform(post("/api/pruebas/crear")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -256,10 +282,16 @@ public class PruebaControllerIntegrationTest {
     @Test
     void crearNuevaPrueba_cuandoVehiculoYaEstaEnPrueba_deberiaRetornar400BadRequest() throws Exception {
         // 1. Creamos una prueba válida para nuestro vehículo, simulando que ya está en curso.
-        pruebaService.crearPrueba(new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null));
+        pruebaService.crearPrueba(new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null),
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null),
+                new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null,
+                null, null));
 
         // 2. Ahora, intentamos crear OTRA prueba con el MISMO vehículo.
-        PruebaDto pruebaDuplicadaDto = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+        PruebaDto pruebaDuplicadaDto = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null),
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null),
+                new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null,
+                null, null);
 
         mockMvc.perform(post("/api/pruebas/crear")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -275,7 +307,10 @@ public class PruebaControllerIntegrationTest {
     @Test
     void crearYLuegoBorrarPrueba_deberiaCompletarCicloExitosamente() throws Exception {
         // 1. PREPARAR DATOS PARA CREAR (usamos los datos válidos del setup)
-        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null), new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null), new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null, null);
+        PruebaDto pruebaDtoParaCrear = new PruebaDto(null, new VehiculoDto(vehiculoDePrueba.getId(), null, null),
+                new EmpleadoDto(empleadoDePrueba.getLegajo(), null, null, null),
+                new InteresadoDto(interesadoDePrueba.getId(), null, null, null, null, null, null, null), null, null,
+                null, null);
 
         // 2. EJECUTAR CREACIÓN Y OBTENER ID
         MvcResult resultCreacion = mockMvc.perform(post("/api/pruebas/crear")
@@ -371,7 +406,8 @@ public class PruebaControllerIntegrationTest {
     @Test
     void finalizarPrueba_cuandoPruebaExisteYEstaEnCurso_deberiaRetornar200OkConPruebaActualizada() throws Exception {
         // 1. Arrange: Creamos una prueba "en curso" en la BD.
-        Prueba pruebaEnCurso = new Prueba(null, vehiculoDePrueba,interesadoDePrueba , empleadoDePrueba, new Date(), null, null);
+        Prueba pruebaEnCurso = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba, new Date(),
+                null, null, null);
         pruebaEnCurso = pruebaRepository.save(pruebaEnCurso);
         String comentario = "El cliente quedó muy satisfecho con el rendimiento.";
 
@@ -402,7 +438,8 @@ public class PruebaControllerIntegrationTest {
     @Test
     void finalizarPrueba_cuandoPruebaYaEstaFinalizada_deberiaRetornar400BadRequest() throws Exception {
         // 1. Arrange: Creamos una prueba que YA tiene una fecha de fin.
-        Prueba pruebaYaFinalizada = new Prueba(null, vehiculoDePrueba, interesadoDePrueba , empleadoDePrueba, new Date(), new Date(), "Prueba finalizada previamente.");
+        Prueba pruebaYaFinalizada = new Prueba(null, vehiculoDePrueba, interesadoDePrueba, empleadoDePrueba,
+                new Date(), new Date(), "Prueba finalizada previamente.", null);
         pruebaYaFinalizada = pruebaRepository.save(pruebaYaFinalizada);
         String nuevoComentario = "Intentando finalizar de nuevo.";
 
@@ -412,5 +449,34 @@ public class PruebaControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest()) // Esperamos 400 Bad Request
                 .andExpect(content().string("La prueba ya ha sido finalizada."));
+    }
+
+    @Test
+    void getPruebasConIncidentes_deberiaRetornarSoloLasConIncidenteTrue() throws Exception {
+        // 1. PREPARAR DATOS: Creamos una prueba con incidente y otra sin incidente
+        Prueba pruebaIncidente = new Prueba();
+        pruebaIncidente.setVehiculo(vehiculoDePrueba);
+        pruebaIncidente.setEmpleado(empleadoDePrueba);
+        pruebaIncidente.setInteresado(interesadoDePrueba);
+        pruebaIncidente.setFechaHoraInicio(new Date());
+        pruebaIncidente.setIncidente(true);
+        pruebaRepository.save(pruebaIncidente);
+
+        Prueba pruebaNormal = new Prueba();
+        pruebaNormal.setVehiculo(vehiculoDePrueba);
+        pruebaNormal.setEmpleado(empleadoDePrueba);
+        pruebaNormal.setInteresado(interesadoDePrueba);
+        pruebaNormal.setFechaHoraInicio(new Date());
+        pruebaNormal.setIncidente(false);
+        pruebaRepository.save(pruebaNormal);
+
+        // 2. EJECUTAR Y VERIFICAR
+        mockMvc.perform(get("/api/pruebas/incidentes")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(pruebaIncidente.getId()))
+                .andExpect(jsonPath("$[0].incidente").value(true));
     }
 }

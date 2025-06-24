@@ -24,7 +24,8 @@ public class GWConfig {
                 .route(p -> p
                         // La regla se activa si la ruta coincide con CUALQUIERA de estos patrones.
                         .path("/api/pruebas/**", "/api/vehiculos/**", "/api/crud/vehiculos/**",
-                                "/api/empleados/**", "/api/crud/modelos/**", "/api/interesados/**"
+                                "/api/empleados/**", "/api/crud/modelos/**", "/api/interesados/**",
+                                "/api/reportes/**"
                         )
                         .uri(uriAgencia))
 //                .route(p -> p

@@ -150,4 +150,15 @@ public class PruebaService {
         return interesado;
     }
 
+    public List<PruebaDto> getPruebasConIncidentes() {
+        return pruebaRepository.findByIncidenteTrue().stream().map(PruebaDto::new).toList();
+    }
+
+    public List<PruebaDto> getIncidentesPorEmpleado(Long legajo) {
+        return pruebaRepository.findByIncidenteTrueAndEmpleado_Legajo(legajo)
+                .stream()
+                .map(PruebaDto::new)
+                .toList();
+    }
+
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.util.Date;
 
 @Entity
 @Table(name = "Posiciones")
@@ -23,7 +22,7 @@ public class Posicion {
     private Vehiculo vehiculo;
 
     @Column(name = "FECHA_HORA", nullable = false)
-    private Date fechaHora;
+    private Long fechaHora;
 
     @Column(name = "LATITUD", nullable = false)
     private Double latitud;

@@ -117,4 +117,20 @@ public class PruebaController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/incidentes")
+    public ResponseEntity<List<PruebaDto>> getPruebasConIncidentes() {
+        List<PruebaDto> pruebas = pruebaService.getPruebasConIncidentes();
+        return ResponseEntity.ok(pruebas);
+    }
+
+    @GetMapping("/incidentes/empleado/{legajo}")
+    public ResponseEntity<List<PruebaDto>> getIncidentesPorEmpleado(@PathVariable Long legajo) {
+        List<PruebaDto> pruebas = pruebaService.getIncidentesPorEmpleado(legajo);
+        if (pruebas.isEmpty()) {
+            // Se podría retornar 204 No Content si se prefiere
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(pruebas);
+    }
 }
