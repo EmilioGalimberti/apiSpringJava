@@ -124,7 +124,7 @@
                             <exclude>org/example/models/*.class</exclude>
 
                             <exclude>org/example/repositories/*.class</exclude>
-
+                            <exclude>org/example/service/KafkaProducer.class</exclude>
                             <exclude>org/example/Main.class</exclude>
                         </excludes>
                     </configuration>
