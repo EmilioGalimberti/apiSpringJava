@@ -818,7 +818,6 @@
     document.getElementById('notificaciones-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('notificaciones-id').value;
-        //const fechaFormateada = fecha.toLocaleDateString("es-AR");
         const data = {
             mensaje: document.getElementById('notificaciones-mensaje').value,
             codigoPromocion: document.getElementById('notificaciones-codigo').value,
@@ -903,7 +902,6 @@
 
     async function loadEmpleados() {
         try {
-            //const data = await apiClient.get('/crud/empleados');
             const data = await apiClient.get('/empleados');
             renderTable('empleados-table-body', data, [{key: 'legajo'}, {key: 'nombre'}, {key: 'apellido'}], [
                 { handler: (item) => editEmpleado(item), icon: 'fas fa-edit', class: 'text-blue-600 hover:text-blue-900 mr-4' },
