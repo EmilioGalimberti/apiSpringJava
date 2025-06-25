@@ -203,7 +203,7 @@ class DataSetupService {
         String documentoUnico = "DOC" + System.currentTimeMillis();
         Interesado i = interesadoRepository.save(new Interesado(null, "DNI", documentoUnico, "Pepe", "Prueba", false, 54321, new Date(System.currentTimeMillis() + 10000000), null));
 
-        pruebaRepository.save(new Prueba(null, v, i, e, new Date(), null, "Prueba en curso para el test"));
+        pruebaRepository.save(new Prueba(null, v, i, e, new Date(), null, "Prueba en curso para el test", null));
 
         return v;
     }

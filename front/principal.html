@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Agencia de Vehículos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .tab-active { border-bottom-color: #3b82f6; color: #3b82f6; background-color: #eff6ff; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .modal-enter { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+<div id="loginModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 modal-enter">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-900">Iniciar Sesión</h2>
+            <p class="text-gray-500 mt-1">Accede al panel de administración.</p>
+        </div>
+        <form id="login-form">
+            <div class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Usuario</label>
+                    <input type="text" id="username" value="g001-B" class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="password" value="g001-B-backend" class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+            <div class="mt-8">
+                <button type="submit" id="login-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <span id="login-btn-text">Ingresar</span>
+                    <span id="login-spinner" class="hidden"><i class="fas fa-spinner fa-spin"></i> Conectando...</span>
+                </button>
+            </div>
+            <p id="login-error" class="text-red-500 text-sm text-center mt-4 h-5"></p>
+        </form>
+    </div>
+</div>
+
+
+<div id="app-container" class="hidden">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900">Panel de Administración de Agencia</h1>
+                <p class="text-lg text-gray-600 mt-1">Gestiona todos los recursos de la agencia desde un único lugar.</p>
+            </div>
+            <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i>Cerrar Sesión
+            </button>
+        </header>
+
+        <div class="mb-6 border-b border-gray-200">
+            <nav class="flex flex-wrap -mb-px" id="tabs">
+                <a href="#" class="tab-link tab-active" data-tab="vehiculos"><i class="fa-solid fa-car mr-2"></i>Vehículos</a>
+                <a href="#" class="tab-link" data-tab="modelos"><i class="fa-solid fa-car-side mr-2"></i>Modelos</a>
+                <a href="#" class="tab-link" data-tab="empleados"><i class="fa-solid fa-user-tie mr-2"></i>Empleados</a>
+                <a href="#" class="tab-link" data-tab="interesados"><i class="fa-solid fa-users mr-2"></i>Interesados</a>
+                <a href="#" class="tab-link" data-tab="pruebas"><i class="fa-solid fa-road mr-2"></i>Pruebas de Manejo</a>
+                <a href="#" class="tab-link" data-tab="notificaciones"><i class="fa-solid fa-bell mr-2"></i>Notificaciones</a>
+            </nav>
+        </div>
+
+        <main id="content">
+            <section id="vehiculos" class="content-section active">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Gestión de Vehículos</h2>
+                    <button onclick="openModal('vehiculoModal')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        <i class="fa-solid fa-plus mr-2"></i>Añadir Vehículo
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="vehiculos-table-body" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="modelos" class="content-section">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Gestión de Modelos</h2>
+                    <button onclick="openModal('modeloModal')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        <i class="fa-solid fa-plus mr-2"></i>Añadir Modelo
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="modelos-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="empleados" class="content-section">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Gestión de Empleados</h2>
+                    <button onclick="openModal('empleadoModal')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        <i class="fa-solid fa-plus mr-2"></i>Añadir Empleado
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Legajo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apellido</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="empleados-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="interesados" class="content-section">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Gestión de Interesados</h2>
+                    <button onclick="openModal('interesadoModal')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        <i class="fa-solid fa-plus mr-2"></i>Añadir Interesado
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre Completo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="interesados-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="pruebas" class="content-section">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Gestión de Pruebas de Manejo</h2>
+                    <button onclick="openModal('pruebaModal')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        <i class="fa-solid fa-plus mr-2"></i>Agendar Prueba
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Inicio</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interesado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehículo</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="pruebas-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="notificaciones" class="content-section">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Notificaciones</h2>
+                    <button onclick="openModal('notificacionesModal')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        <i class="fa-solid fa-plus mr-2"></i>Crear Notificacion de Promocion
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Notificacion</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mensaje</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Codigo Promocion</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Expiracion</th>
+                        </tr>
+                        </thead>
+                        <tbody id="notificaciones-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div class="hidden" id="modal-container">
+    <div id="vehiculoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden modal-enter z-20">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="vehiculo-modal-title">Añadir Vehículo</h3>
+                    <button onclick="closeModal('vehiculoModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <form id="vehiculo-form" class="mt-2 space-y-4 text-left">
+                    <input type="hidden" id="vehiculo-id">
+                    <div>
+                        <label for="vehiculo-patente" class="block text-sm font-medium text-gray-700">Patente</label>
+                        <input type="text" id="vehiculo-patente" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="vehiculo-modelo" class="block text-sm font-medium text-gray-700">Modelo</label>
+                        <select id="vehiculo-modelo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm"></select>
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modeloModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden modal-enter z-20">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modelo-modal-title">Añadir Modelo</h3>
+                    <button onclick="closeModal('modeloModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <form id="modelo-form" class="mt-2 space-y-4 text-left">
+                    <input type="hidden" id="modelo-id">
+                    <div>
+                        <label for="modelo-descripcion" class="block text-sm font-medium text-gray-700">Descripción</label>
+                        <input type="text" id="modelo-descripcion" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="modelo-marca" class="block text-sm font-medium text-gray-700">Marca</label>
+                        <select id="modelo-marca" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm"></select>
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="empleadoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden modal-enter z-20">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="empleado-modal-title">Añadir Empleado</h3>
+                    <button onclick="closeModal('empleadoModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <form id="empleado-form" class="mt-2 space-y-4 text-left">
+                    <input type="hidden" id="empleado-id">
+                    <div>
+                        <label for="empleado-nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                        <input type="text" id="empleado-nombre" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="empleado-apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
+                        <input type="text" id="empleado-apellido" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="empleado-telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                        <input type="number" id="empleado-telefono" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="interesadoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden modal-enter z-20">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="interesado-modal-title">Añadir Interesado</h3>
+                    <button onclick="closeModal('interesadoModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <form id="interesado-form" class="mt-2 space-y-4 text-left">
+                    <input type="hidden" id="interesado-id">
+                    <div>
+                        <label for="interesado-nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                        <input type="text" id="interesado-nombre" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="interesado-apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
+                        <input type="text" id="interesado-apellido" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="interesado-tipo-documento" class="block text-sm font-medium text-gray-700">Tipo Documento</label>
+                        <input type="text" id="interesado-tipo-documento" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="interesado-documento" class="block text-sm font-medium text-gray-700">Documento</label>
+                        <input type="text" id="interesado-documento" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="interesado-licencia" class="block text-sm font-medium text-gray-700">Nro. Licencia</label>
+                        <input type="number" id="interesado-licencia" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="interesado-vencimiento" class="block text-sm font-medium text-gray-700">Vencimiento Licencia</label>
+                        <input type="date" id="interesado-vencimiento" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="pruebaModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden modal-enter z-20">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="prueba-modal-title">Agendar Prueba de Manejo</h3>
+                    <button onclick="closeModal('pruebaModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <form id="prueba-form" class="mt-2 space-y-4 text-left">
+                    <input type="hidden" id="prueba-id">
+                    <div>
+                        <label for="prueba-interesado" class="block text-sm font-medium text-gray-700">Interesado</label>
+                        <select id="prueba-interesado" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm"></select>
+                    </div>
+                    <div>
+                        <label for="prueba-vehiculo" class="block text-sm font-medium text-gray-700">Vehículo</label>
+                        <select id="prueba-vehiculo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm"></select>
+                    </div>
+                    <div>
+                        <label for="prueba-empleado" class="block text-sm font-medium text-gray-700">Empleado a Cargo</label>
+                        <select id="prueba-empleado" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm"></select>
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="notificacionesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden modal-enter z-20">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="notificaciones-modal-title">Crear Notificacion de Promocion</h3>
+                    <button onclick="closeModal('notificacionesModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <form id="notificaciones-form" class="mt-2 space-y-4 text-left">
+                    <input type="hidden" id="notificaciones-id">
+                    <div>
+                        <label for="notificaciones-mensaje" class="block text-sm font-medium text-gray-700">Mensaje</label>
+                        <input type="text" id="notificaciones-mensaje" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="notificaciones-codigo" class="block text-sm font-medium text-gray-700">Codigo Promocion</label>
+                        <input type="text" id="notificaciones-codigo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="notificaciones-fechafin" class="block text-sm font-medium text-gray-700">Fecha Expiracion</label>
+                        <input type="date" id="notificaciones-fechafin" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden modal-enter z-30">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-sm shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div id="alert-icon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+                    <i class="fa-solid fa-bell text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2" id="alert-title">Notificación</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500" id="alert-message"></p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="alert-ok-button" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // --- CONFIGURATION & STATE ---
+    const API_BASE_URL = 'http://localhost:9000/api'; // URL of your Spring Cloud Gateway
+    let accessToken = null;
+    let modelosMap = new Map(); // Cache for vehicle models
+
+    // --- DOM Elements ---
+    const loginModal = document.getElementById('loginModal');
+    const appContainer = document.getElementById('app-container');
+    const loginForm = document.getElementById('login-form');
+    const loginBtn = document.getElementById('login-btn');
+    const loginBtnText = document.getElementById('login-btn-text');
+    const loginSpinner = document.getElementById('login-spinner');
+    const loginError = document.getElementById('login-error');
+    const logoutBtn = document.getElementById('logout-btn');
+    const tabs = document.querySelectorAll('.tab-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const alertModal = document.getElementById('alertModal');
+    const alertTitle = document.getElementById('alert-title');
+    const alertMessage = document.getElementById('alert-message');
+    const alertOkButton = document.getElementById('alert-ok-button');
+
+    // --- AUTHENTICATION ---
+    async function getAccessToken() {
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const tokenUrl = 'https://labsys.frc.utn.edu.ar/aim/realms/backend-tps/protocol/openid-connect/token';
+        const params = new URLSearchParams();
+        params.append('grant_type', 'password');
+        params.append('client_id', 'cliente-tpi');
+        params.append('client_secret', 'ZmiMMce6zh4xKHde1FFKbfkiThDyYpyn');
+        params.append('username', usernameInput.value);
+        params.append('password', passwordInput.value);
+
+        loginBtn.disabled = true;
+        loginBtnText.classList.add('hidden');
+        loginSpinner.classList.remove('hidden');
+        loginError.textContent = '';
+
+        try {
+            const response = await fetch(tokenUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            });
+            const data = await response.json();
+            if (response.ok) {
+                accessToken = data.access_token;
+                loginModal.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                await loadInitialData();
+            } else {
+                accessToken = null;
+                loginError.textContent = `Error: ${data.error_description || 'Credenciales inválidas.'}`;
+            }
+        } catch (error) {
+            accessToken = null;
+            loginError.textContent = 'Error de red al conectar con el servidor de autenticación.';
+            console.error('Error de red con Keycloak:', error);
+        } finally {
+            loginBtn.disabled = false;
+            loginBtnText.classList.remove('hidden');
+            loginSpinner.classList.add('hidden');
+        }
+    }
+
+    function logout() {
+        accessToken = null;
+        modelosMap.clear();
+        appContainer.classList.add('hidden');
+        loginModal.classList.remove('hidden');
+        document.getElementById('password').value = "g001-B-backend";
+        loginError.textContent = '';
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        getAccessToken();
+    });
+
+    logoutBtn.addEventListener('click', logout);
+
+    // --- API Client ---
+    const apiClient = {
+        get: async (endpoint) => handleRequest(`${API_BASE_URL}${endpoint}`),
+        post: async (endpoint, body) => handleRequest(`${API_BASE_URL}${endpoint}`, { method: 'POST', body: JSON.stringify(body) }),
+        put: async (endpoint, body) => handleRequest(`${API_BASE_URL}${endpoint}`, { method: 'PUT', body: JSON.stringify(body) }),
+        delete: async (endpoint) => handleRequest(`${API_BASE_URL}${endpoint}`, { method: 'DELETE' }),
+    };
+
+    async function handleRequest(url, options = {}) {
+        const defaultHeaders = { 'Content-Type': 'application/json' };
+        if (accessToken) {
+            defaultHeaders['Authorization'] = `Bearer ${accessToken}`;
+        }
+
+        const config = { ...options, headers: { ...defaultHeaders, ...options.headers } };
+
+        try {
+            const response = await fetch(url, config);
+            if (response.status === 401) {
+                logout();
+                showAlert('Sesión Expirada', 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.', 'error');
+                throw new Error('No autorizado');
+            }
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error en la red: ${response.status} ${response.statusText}. Detalles: ${errorText}`);
+            }
+            return response.status === 204 ? null : await response.json();
+        } catch (error) {
+            console.error('Error en la petición a la API:', error);
+            if (error.message !== 'No autorizado') {
+                showAlert('Error de Conexión', `No se pudo comunicar con la API. Verifique que el backend y el gateway estén funcionando.`, 'error');
+            }
+            throw error;
+        }
+    }
+
+    // --- MODAL & ALERT ---
+    function openModal(modalId) {
+        document.getElementById('modal-container').classList.remove('hidden');
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        document.getElementById('modal-container').classList.add('hidden');
+        const form = document.getElementById(modalId).querySelector('form');
+        if (form) {
+            form.reset();
+            const hiddenId = form.querySelector('input[type="hidden"]');
+            if (hiddenId) hiddenId.value = '';
+        }
+    }
+
+    function showAlert(title, message, type = 'info') {
+        alertTitle.textContent = title;
+        alertMessage.textContent = message;
+        const iconContainer = document.getElementById('alert-icon');
+        const icon = iconContainer.querySelector('i');
+
+        iconContainer.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full';
+        icon.className = 'text-xl';
+
+        if (type === 'error') {
+            iconContainer.classList.add('bg-red-100');
+            icon.classList.add('fa-solid', 'fa-triangle-exclamation', 'text-red-600');
+        } else if (type === 'success') {
+            iconContainer.classList.add('bg-green-100');
+            icon.classList.add('fa-solid', 'fa-check-circle', 'text-green-600');
+        } else {
+            iconContainer.classList.add('bg-blue-100');
+            icon.classList.add('fa-solid', 'fa-bell', 'text-blue-600');
+        }
+
+        document.getElementById('modal-container').classList.remove('hidden');
+        openModal('alertModal');
+        alertOkButton.onclick = () => closeModal('alertModal');
+    }
+
+    // --- TAB NAVIGATION & DATA LOADING ---
+    async function loadInitialData() {
+        try {
+            const modelos = await apiClient.get('/crud/modelos');
+            modelosMap = new Map(modelos.map(m => [m.id, m]));
+            loadDataForTab('vehiculos');
+        } catch (e) {
+            showAlert('Error Inicial', 'No se pudieron cargar los datos iniciales (modelos). La aplicación puede no funcionar correctamente.', 'error');
+        }
+    }
+
+    function switchTab(tab) {
+        tabs.forEach(t => t.classList.remove('tab-active'));
+        tab.classList.add('tab-active');
+
+        const tabName = tab.dataset.tab;
+        contentSections.forEach(section => {
+            section.classList.toggle('active', section.id === tabName);
+        });
+        loadDataForTab(tabName);
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab(tab);
+        });
+    });
+
+    function loadDataForTab(tabName) {
+        switch(tabName) {
+            case 'vehiculos': loadVehiculos(); break;
+            case 'modelos': loadModelos(); break;
+            case 'empleados': loadEmpleados(); break;
+            case 'interesados': loadInteresados(); break;
+            case 'pruebas': loadPruebas(); break;
+            case 'notificaciones': loadNotificaciones(); break;
+        }
+    }
+
+    // --- RENDER FUNCTIONS ---
+    const renderTable = (tbodyId, data, columns, actions) => {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = '';
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${columns.length + (actions ? 1 : 0)}" class="text-center py-4 text-gray-500">No hay datos disponibles.</td></tr>`;
+            return;
+        }
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-gray-50";
+
+            columns.forEach(col => {
+                const td = document.createElement('td');
+                td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-700';
+                let value = item;
+                col.key.split('.').forEach(k => value = value ? value[k] : 'N/A');
+
+                const formattedValue = col.formatter ? col.formatter(value, item) : value;
+                if (typeof formattedValue === 'string' && formattedValue.includes('<')) {
+                    td.innerHTML = formattedValue;
+                } else {
+                    td.textContent = formattedValue;
+                }
+                tr.appendChild(td);
+            });
+
+            if (actions) {
+                const td = document.createElement('td');
+                td.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
+                actions.forEach(action => {
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.className = action.class;
+                    a.innerHTML = `<i class="${action.icon}"></i>`;
+                    a.onclick = (e) => { e.preventDefault(); action.handler(item); };
+                    td.appendChild(a);
+                });
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        });
+    };
+
+    const populateSelect = async (selectId, endpoint, valueField, textField, placeholder = 'Seleccione una opción') => {
+        const select = document.getElementById(selectId);
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        try {
+            const data = await apiClient.get(endpoint);
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valueField];
+                option.textContent = typeof textField === 'function' ? textField(item) : item[textField];
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error(`Error al poblar el select ${selectId}:`, error);
+        }
+    };
+
+    // --- CRUD for VEHICULOS ---
+    async function loadVehiculos() {
+        try {
+            const vehiculos = await apiClient.get('/crud/vehiculos');
+            const columns = [
+                { key: 'id' },
+                { key: 'patente' },
+                { key: 'idModelo', formatter: (idModelo) => modelosMap.get(idModelo)?.descripcion || 'Desconocido' }
+            ];
+            const actions = [
+                { handler: editVehiculo, icon: 'fas fa-edit', class: 'text-blue-600 hover:text-blue-900 mr-4' },
+                { handler: deleteVehiculo, icon: 'fas fa-trash', class: 'text-red-600 hover:text-red-900' }
+            ];
+            renderTable('vehiculos-table-body', vehiculos, columns, actions);
+        } catch (error) {
+            document.getElementById('vehiculos-table-body').innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Error al cargar los vehículos.</td></tr>`;
+        }
+    }
+
+    document.getElementById('vehiculo-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('vehiculo-id').value;
+        const data = {
+            patente: document.getElementById('vehiculo-patente').value,
+            idModelo: parseInt(document.getElementById('vehiculo-modelo').value, 10)
+        };
+
+        try {
+            let message;
+            if (id) {
+                await apiClient.put(`/crud/vehiculos/${id}`, data);
+                message = 'Vehículo actualizado correctamente.';
+            } else {
+                await apiClient.post('/crud/vehiculos', data);
+                message = 'Vehículo creado correctamente.';
+            }
+            closeModal('vehiculoModal');
+            await loadVehiculos();
+            showAlert('Éxito', message, 'success');
+        } catch (error) {
+            showAlert('Error', `No se pudo guardar el vehículo.`, 'error');
+        }
+    });
+
+    function editVehiculo(vehiculo) {
+        document.getElementById('vehiculo-form').reset();
+        document.getElementById('vehiculo-modal-title').textContent = "Editar Vehículo";
+        document.getElementById('vehiculo-id').value = vehiculo.id;
+        document.getElementById('vehiculo-patente').value = vehiculo.patente;
+        populateSelect('vehiculo-modelo', '/crud/modelos', 'id', 'descripcion', 'Seleccione modelo').then(() => {
+            document.getElementById('vehiculo-modelo').value = vehiculo.idModelo;
+        });
+        openModal('vehiculoModal');
+    }
+
+    async function deleteVehiculo(vehiculo) {
+        if (confirm(`¿Estás seguro de que quieres eliminar el vehículo con patente ${vehiculo.patente}?`)) {
+            try {
+                await apiClient.delete(`/crud/vehiculos/${vehiculo.id}`);
+                showAlert('Éxito', 'Vehículo eliminado.', 'success');
+                loadVehiculos();
+            } catch(error) {
+                showAlert('Error', `No se pudo eliminar el vehículo.`, 'error');
+            }
+        }
+    }
+
+    const vehiculoModalObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            if (mutation.attributeName === 'class' && !document.getElementById('vehiculoModal').classList.contains('hidden')) {
+                if(!document.getElementById('vehiculo-id').value) {
+                    document.getElementById('vehiculo-form').reset();
+                    document.getElementById('vehiculo-modal-title').textContent = "Añadir Vehículo";
+                    populateSelect('vehiculo-modelo', '/crud/modelos', 'id', 'descripcion', 'Seleccione modelo');
+                }
+            }
+        }
+    });
+    vehiculoModalObserver.observe(document.getElementById('vehiculoModal'), { attributes: true });
+
+
+    // --- CRUD for MODELOS ---
+    async function loadModelos() {
+        try {
+            const modelos = await apiClient.get('/crud/modelos');
+            renderTable('modelos-table-body', modelos,
+                [{ key: 'id' }, { key: 'descripcion' }, { key: 'nombreMarca' }],
+                [
+                    { handler: editModelo, icon: 'fas fa-edit', class: 'text-blue-600 hover:text-blue-900 mr-4' },
+                    { handler: deleteModelo, icon: 'fas fa-trash', class: 'text-red-600 hover:text-red-900' }
+                ]
+            );
+        } catch (error) {
+            document.getElementById('modelos-table-body').innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Error al cargar los modelos.</td></tr>`;
+        }
+    }
+
+    document.getElementById('modelo-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('modelo-id').value;
+        const data = {
+            descripcion: document.getElementById('modelo-descripcion').value,
+            idMarca: parseInt(document.getElementById('modelo-marca').value, 10)
+        };
+        try {
+            let message;
+            if (id) {
+                await apiClient.put(`/crud/modelos/${id}`, data);
+                message = 'Modelo actualizado.';
+            } else {
+                await apiClient.post('/crud/modelos', data);
+                message = 'Modelo creado.';
+            }
+            closeModal('modeloModal');
+            await loadModelos();
+            await loadInitialData(); // Reload models map
+            showAlert('Éxito', message, 'success');
+        } catch(error) {
+            showAlert('Error', `No se pudo guardar el modelo.`, 'error');
+        }
+    });
+
+    document.getElementById('notificaciones-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('notificaciones-id').value;
+        //const fechaFormateada = fecha.toLocaleDateString("es-AR");
+        const data = {
+            mensaje: document.getElementById('notificaciones-mensaje').value,
+            codigoPromocion: document.getElementById('notificaciones-codigo').value,
+            fechaExpiracion: new Date(document.getElementById('notificaciones-fechafin').value)
+        };
+        try {
+            let message;
+            await apiClient.post('/notificaciones/promocion/new', data);
+            message = 'Promocion creada.';
+            closeModal('notificacionesModal');
+            await loadNotificaciones();
+            await loadInitialData(); // Reload models map
+            showAlert('Éxito', message, 'success');
+        } catch(error) {
+            showAlert('Error', `No se pudo guardar el modelo.`, 'error');
+        }
+    });
+
+    async function populateMarcaSelect(selectId, selectedId = null) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = '<option value="">Seleccione marca</option>';
+        try {
+            // Since there is no /crud/marcas, we derive the brands from the /crud/modelos endpoint
+            const modelos = await apiClient.get('/crud/modelos');
+            const marcas = new Map();
+            modelos.forEach(modelo => {
+                if (!marcas.has(modelo.idMarca)) {
+                    marcas.set(modelo.idMarca, modelo.nombreMarca);
+                }
+            });
+
+            marcas.forEach((nombre, id) => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = nombre;
+                select.appendChild(option);
+            });
+
+            if (selectedId) {
+                select.value = selectedId;
+            }
+
+        } catch (error) {
+            console.error('Error al poblar el select de marcas:', error);
+        }
+    }
+
+    function editModelo(modelo) {
+        document.getElementById('modelo-form').reset();
+        document.getElementById('modelo-modal-title').textContent = "Editar Modelo";
+        document.getElementById('modelo-id').value = modelo.id;
+        document.getElementById('modelo-descripcion').value = modelo.descripcion;
+        populateMarcaSelect('modelo-marca', modelo.idMarca);
+        openModal('modeloModal');
+    }
+
+    async function deleteModelo(modelo) {
+        if (confirm(`¿Estás seguro de que quieres eliminar el modelo ${modelo.descripcion}?`)) {
+            try {
+                await apiClient.delete(`/crud/modelos/${modelo.id}`);
+                showAlert('Éxito', 'Modelo eliminado.', 'success');
+                loadModelos();
+                loadInitialData(); // Reload models map
+            } catch(error) {
+                showAlert('Error', `No se pudo eliminar el modelo.`, 'error');
+            }
+        }
+    }
+
+    const modeloModalObserver = new MutationObserver((mutations) => {
+        for(const mutation of mutations) {
+            if(mutation.attributeName === 'class' && !document.getElementById('modeloModal').classList.contains('hidden') && !document.getElementById('modelo-id').value) {
+                document.getElementById('modelo-form').reset();
+                document.getElementById('modelo-modal-title').textContent = "Añadir Modelo";
+                populateMarcaSelect('modelo-marca');
+            }
+        }
+    });
+    modeloModalObserver.observe(document.getElementById('modeloModal'), {attributes: true});
+
+    // --- CRUD for EMPLEADOS, INTERESADOS, PRUEBAS ---
+
+    async function loadEmpleados() {
+        try {
+            //const data = await apiClient.get('/crud/empleados');
+            const data = await apiClient.get('/empleados');
+            renderTable('empleados-table-body', data, [{key: 'legajo'}, {key: 'nombre'}, {key: 'apellido'}], [
+                { handler: (item) => editEmpleado(item), icon: 'fas fa-edit', class: 'text-blue-600 hover:text-blue-900 mr-4' },
+                { handler: (item) => deleteEmpleado(item), icon: 'fas fa-trash', class: 'text-red-600 hover:text-red-900' }
+            ]);
+        } catch(e) {
+            document.getElementById('empleados-table-body').innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Error al cargar empleados.</td></tr>`;
+        }
+    }
+
+    async function loadNotificaciones() {
+        try {
+            const data = await apiClient.get('/notificaciones/promocion');
+            renderTable('notificaciones-table-body', data, [
+                    {key: 'id'},
+                    {key: 'fechaNotificacion', formatter: (val) => new Date(val).toLocaleString()},
+                    {key: 'mensaje'},
+                    {key: 'codigoPromocion'},
+                    {key: 'fechaExpiracion', formatter: (val) => new Date(val).toLocaleString()}
+                ]);
+        } catch(e) {
+            document.getElementById('notificaciones-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Error al cargar Notificaciones.</td></tr>`;
+        }
+    }
+
+    async function loadInteresados() {
+        try {
+            const data = await apiClient.get('/interesados');
+            renderTable('interesados-table-body', data,
+                [{key: 'id'}, {key: 'nombreCompleto', formatter: (v, item) => `${item.nombre} ${item.apellido}`}, {key: 'documento'}],
+                [
+                    { handler: (item) => editInteresado(item), icon: 'fas fa-edit', class: 'text-blue-600 hover:text-blue-900 mr-4' },
+                    { handler: (item) => deleteInteresado(item), icon: 'fas fa-trash', class: 'text-red-600 hover:text-red-900' }
+                ]
+            );
+        } catch(e) {
+            document.getElementById('interesados-table-body').innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Error al cargar interesados.</td></tr>`;
+        }
+    }
+
+    async function loadPruebas() {
+        try {
+            const data = await apiClient.get('/pruebas');
+            renderTable('pruebas-table-body', data, [
+                    {key: 'id'},
+                    {key: 'fechaHoraInicio', formatter: (val) => new Date(val).toLocaleString()},
+                    {
+                        key: 'fechaHoraFin',
+                        formatter: (val) => {
+                            if (!val) {
+                                return `<div class="flex items-center"><span class="h-2.5 w-2.5 rounded-full bg-green-500 mr-2 animate-pulse"></span><span>En Curso</span></div>`;
+                            } else {
+                                return new Date(val).toLocaleString();
+                            }
+                        }
+                    },
+                    {key: 'interesado.nombre'},
+                    {key: 'vehiculo.patente'}
+                ],
+                [
+                    { handler: (item) => deletePrueba(item), icon: 'fas fa-trash', class: 'text-red-600 hover:text-red-900' }
+                ]);
+        } catch(e) {
+            document.getElementById('pruebas-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Error al cargar pruebas.</td></tr>`;
+        }
+    }
+
+    async function deletePrueba(prueba) {
+        if(confirm(`¿Seguro que quieres eliminar la prueba ID ${prueba.id}?`)) {
+            try {
+                await apiClient.delete(`/crud/pruebas/${prueba.id}`);
+                showAlert('Éxito', 'Prueba eliminada.', 'success');
+                loadPruebas();
+            } catch(e) {
+                showAlert('Error', 'No se pudo eliminar la prueba.', 'error');
+            }
+        }
+    }
+
+    // Placeholder functions for edit/delete of Empleados and Interesados
+    function editEmpleado(item) { showAlert('Función no implementada', 'La edición de empleados aún no está conectada.'); }
+    function deleteEmpleado(item) { showAlert('Función no implementada', 'La eliminación de empleados aún no está conectada.'); }
+    function editInteresado(item) { showAlert('Función no implementada', 'La edición de interesados aún no está conectada.'); }
+    function deleteInteresado(item) { showAlert('Función no implementada', 'La eliminación de interesados aún no está conectada.'); }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabClasses = 'inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 transition duration-300';
+        tabs.forEach(t => {
+            t.className = '';
+            t.classList.add(...tabClasses.split(' '));
+        });
+        document.querySelector('.tab-link[data-tab="vehiculos"]').classList.add('tab-active');
+    });
+
+</script>
+</body>
+</html>

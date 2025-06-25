@@ -16,6 +16,7 @@ public class PruebaDto {
     private Date fechaHoraInicio;
     private Date fechaHoraFin;
     private String comentarios;
+    private Boolean incidente;
 
     public PruebaDto(Prueba prueba) {
         this.id = prueba.getId();
@@ -25,6 +26,8 @@ public class PruebaDto {
         this.fechaHoraInicio = prueba.getFechaHoraInicio();
         this.fechaHoraFin = prueba.getFechaHoraFin();
         this.comentarios = prueba.getComentarios();
+        this.incidente = prueba.getIncidente();
     }
 
+    public PruebaDto() {}
 }

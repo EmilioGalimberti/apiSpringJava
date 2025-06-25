@@ -110,7 +110,7 @@ public class VehiculoService {
         posicion.setVehiculo(vehiculo);
         posicion.setLatitud(posicionDto.getCoordenadas().getLat());
         posicion.setLongitud(posicionDto.getCoordenadas().getLon());
-        posicion.setFechaHora(new Date());
+        posicion.setFechaHora(System.currentTimeMillis());
         return posicion;
     }
     //Una regla de negocio crucial. Usa los repositorios para asegurar que la posición que se está registrando pertenece a un vehículo real que está actualmente en una prueba de manejo.
@@ -134,7 +134,7 @@ public class VehiculoService {
 
     /**
      * Verifica si la posición del vehículo está fuera del radio admitido por la agencia.
-     * Utiliza el nuevo método de cálculo de distancia basado en Haversine.
+     * Utiliza el nuevo metodo de cálculo de distancia basado en Haversine.
      *
      * @param posicion La posición del vehículo a verificar.
      * @param restricciones Las restricciones de la agencia que incluyen ubicación y radio máximo.

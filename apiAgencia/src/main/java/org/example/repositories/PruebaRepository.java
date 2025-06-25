@@ -4,9 +4,11 @@ import org.example.models.Prueba;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface PruebaRepository extends JpaRepository<Prueba, Integer> {
     /*
         La siguiente query hace una consulta sobre si existe alguna prueba
@@ -22,6 +24,8 @@ public interface PruebaRepository extends JpaRepository<Prueba, Integer> {
        Spring Data JPA genera automáticamente la consulta JPQL correspondiente (SELECT p FROM Prueba p WHERE p.fechaHoraFin IS NULL).
     */
     List<Prueba> findByFechaHoraFinIsNull();
+
+    long countByFechaHoraFinIsNull();
 
     /*
         La siguiente query hace una consulta que busca una prueba
@@ -47,4 +51,10 @@ public interface PruebaRepository extends JpaRepository<Prueba, Integer> {
             @Param("fechaNotificacion") LocalDateTime fechaNotificacion,
             @Param("idEmpleado") Integer idEmpleado);
  */
+
+    List<Prueba> findByIncidenteTrue();
+
+    List<Prueba> findByIncidenteTrueAndEmpleado_Legajo(Long legajo);
+
+    List<Prueba> findAllByVehiculo_Id(Integer vehiculoId);
 }

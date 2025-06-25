@@ -1,8 +1,10 @@
 package org.example.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PosicionDto {
     private Integer id;
     private VehiculoDto vehiculo;
@@ -10,6 +12,7 @@ public class PosicionDto {
     private String mensaje;
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Coordenadas {
         private double lat;
         private double lon;

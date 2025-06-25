@@ -43,6 +43,8 @@ public class Prueba {
     @Column(name = "COMENTARIOS", length = 1000)
     private String comentarios;
 
+    @Column(name = "INCIDENTE")
+    private Boolean incidente = false;
 
     public Prueba(Vehiculo vehiculo, Interesado interesado, Empleado empleado, Date fechaHoraInicio) {
         this.vehiculo = vehiculo;

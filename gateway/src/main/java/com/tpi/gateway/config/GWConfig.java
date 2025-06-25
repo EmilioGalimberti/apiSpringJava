@@ -24,14 +24,22 @@ public class GWConfig {
                 .route(p -> p
                         // La regla se activa si la ruta coincide con CUALQUIERA de estos patrones.
                         .path("/api/pruebas/**", "/api/vehiculos/**", "/api/crud/vehiculos/**",
-                                "/api/empleados/**", "/api/crud/modelos/**", "/api/interesados/**"
+                                "/api/empleados/**", "/api/crud/modelos/**", "/api/interesados/**",
+                                "/api/reportes/**"
                         )
                         .uri(uriAgencia))
-//                .route(p -> p
-//                        .path("/api/v1/notificaciones/**")
-//                        .filters(f -> f.stripPrefix(3))
-//                        .uri(uriNotificaciones))
                 .build();
     }
 
+    @Bean
+    public RouteLocator configurarRutasNotificacion(RouteLocatorBuilder builder,
+                                        @Value("${notificaciones-api-gw.microservicio-agencia}") String uriAgencia) {
+
+        return builder.routes()
+                .route(p -> p
+                        // La regla se activa si la ruta coincide con CUALQUIERA de estos patrones.
+                        .path("/api/notificaciones/**")
+                        .uri(uriAgencia))
+                .build();
+    }
 }

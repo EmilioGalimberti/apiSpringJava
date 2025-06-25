@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Sensor GPS para Agencia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #log-container { font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 1.4; }
+        .log-entry { border-bottom: 1px solid #E5E7EB; }
+        .log-success { color: #16A34A; }
+        .log-error { color: #DC2626; }
+        .log-info { color: #6B7280; }
+        .blinking-dot { animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        #map { height: 100%; width: 100%; border-radius: 0.5rem; z-index: 1; }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-800">🛰️ Simulador de Sensor GPS</h1>
+            <p class="text-stone-600 mt-2">Este panel simula un dispositivo GPS que se autentica en Keycloak y envía su posición a la API.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg flex flex-col">
+                <div>
+                    <h2 class="text-2xl font-semibold border-b pb-2 mb-4">Panel de Control</h2>
+                    
+                    <div class="space-y-4 p-4 border rounded-lg bg-stone-50">
+                        <h3 class="font-bold text-lg text-stone-700">Autenticación (Keycloak)</h3>
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-stone-700">Usuario (g001-C):</label>
+                            <input type="text" id="username" value="g001-C" class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-stone-700">Contraseña:</label>
+                            <input type="password" id="password" value="g001-C-backend" class="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm">
+                        </div>
+                        <button type="button" id="get-token-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">1. Obtener Token de Acceso</button>
+                        <textarea id="token-display" rows="3" class="w-full text-xs bg-stone-200 p-2 rounded-md" readonly placeholder="Aquí aparecerá el token JWT..."></textarea>
+                    </div>
+
+                    <div class="space-y-4 mt-6">
+                        <div>
+                            <label for="apiUrl" class="block text-sm font-medium text-stone-700">URL del Gateway:</label>
+                            <input type="text" id="apiUrl" value="http://localhost:9000/api/vehiculos/posicion/new" class="mt-1 block w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-md shadow-sm">
+                        </div>
+                        <div>
+                            <label for="vehicleId" class="block text-sm font-medium text-stone-700">ID del Vehículo:</label>
+                            <input type="number" id="vehicleId" value="1" class="mt-1 block w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-md shadow-sm">
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <button  type="button"  id="toggle-sensor-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors" disabled>
+                                2. Activar Sensor
+                            </button>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <span class="text-sm text-stone-500">Estado del Sensor:</span>
+                            <span id="sensor-status" class="font-bold text-red-600">APAGADO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex-grow flex flex-col min-h-0">
+                    <h3 class="font-semibold text-lg">Log de Eventos</h3>
+                    <div id="log-container" class="mt-2 p-3 bg-stone-900 text-white rounded-md overflow-y-auto flex-grow">
+                        </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold border-b pb-2 mb-4">Visualización del Vehículo</h2>
+                <div class="flex justify-around items-center mb-4 text-center">
+                    <div>
+                        <p class="text-sm text-stone-500">Latitud Actual</p>
+                        <p id="lat-display" class="font-mono text-xl font-semibold"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-stone-500">Longitud Actual</p>
+                        <p id="lon-display" class="font-mono text-xl font-semibold"></p>
+                    </div>
+                </div>
+                <div class="h-[60vh] rounded-lg overflow-hidden">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiUrlInput = document.getElementById('apiUrl');
+            const vehicleIdInput = document.getElementById('vehicleId');
+            const toggleBtn = document.getElementById('toggle-sensor-btn');
+            const statusDisplay = document.getElementById('sensor-status');
+            const logContainer = document.getElementById('log-container');
+            const latDisplay = document.getElementById('lat-display');
+            const lonDisplay = document.getElementById('lon-display');
+            const getTokenBtn = document.getElementById('get-token-btn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const tokenDisplay = document.getElementById('token-display');
+            
+            let simulationInterval = null;
+            let isSensorActive = false;
+            let map, vehicleMarker;
+            let accessToken = null;
+
+            const config = {
+                ubicacion_agencia: { latitud: -31.4135, longitud: -64.18105 },
+                radio_maximo_metros: 10000,
+                zonas_peligrosas: [
+                    { id_zona: "Z1", nombre_zona: "CentroHistórico", coordenadas: { latitud: -31.4150, longitud: -64.1750 }, radio_metros: 500 },
+                    { id_zona: "Z2", nombre_zona: "BarrioSur", coordenadas: { latitud: -31.4200, longitud: -64.1800 }, radio_metros: 750 },
+                    { id_zona: "Z3", nombre_zona: "ParqueSarmiento", coordenadas: { latitud: -31.4225, longitud: -64.1840 }, radio_metros: 600 },
+                    { id_zona: "Z4", nombre_zona: "NuevaCórdoba", coordenadas: { latitud: -31.4060, longitud: -64.1815 }, radio_metros: 800 },
+                    { id_zona: "Z5", nombre_zona: "CerroDeLasRosas", coordenadas: { latitud: -31.3990, longitud: -64.1835 }, radio_metros: 650 },
+                    { id_zona: "Z6", nombre_zona: "BarrioYuquerí", coordenadas: { latitud: -31.4035, longitud: -64.1700 }, radio_metros: 550 },
+                    { id_zona: "Z7", nombre_zona: "ValleEscondido", coordenadas: { latitud: -31.3900, longitud: -64.1755 }, radio_metros: 700 },
+                    { id_zona: "Z8", nombre_zona: "VillaBelgrano", coordenadas: { latitud: -31.4155, longitud: -64.1930 }, radio_metros: 500 },
+                    { id_zona: "Z9", nombre_zona: "AltoAlberdi", coordenadas: { latitud: -31.4300, longitud: -64.1770 }, radio_metros: 750 },
+                    { id_zona: "Z10", nombre_zona: "CentroEstación", coordenadas: { latitud: -31.4140, longitud: -64.1860 }, radio_metros: 600 }
+                ]
+            };
+            
+            let vehicle = {
+                id: 1,
+                lat: config.ubicacion_agencia.latitud,
+                lon: config.ubicacion_agencia.longitud,
+            };
+
+            function initMap() {
+                map = L.map('map').setView([config.ubicacion_agencia.latitud, config.ubicacion_agencia.longitud], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+                L.circle([config.ubicacion_agencia.latitud, config.ubicacion_agencia.longitud], { color: 'green', fillColor: '#22c55e', fillOpacity: 0.2, radius: config.radio_maximo_metros }).addTo(map);
+                
+                config.zonas_peligrosas.forEach(zona => {
+                    L.circle([zona.coordenadas.latitud, zona.coordenadas.longitud], { color: 'red', fillColor: '#ef4444', fillOpacity: 0.3, radius: zona.radio_metros }).addTo(map).bindTooltip(zona.nombre_zona);
+                });
+
+                const vehicleIcon = L.divIcon({ html: '🚗', className: 'text-2xl', iconSize: [24, 24] });
+                vehicleMarker = L.marker([vehicle.lat, vehicle.lon], { icon: vehicleIcon }).addTo(map);
+                updateDisplay();
+            }
+
+            function updateDisplay() {
+                latDisplay.textContent = vehicle.lat.toFixed(5);
+                lonDisplay.textContent = vehicle.lon.toFixed(5);
+                if (vehicleMarker) vehicleMarker.setLatLng([vehicle.lat, vehicle.lon]);
+            }
+
+            function log(message, type = 'info') {
+                const now = new Date();
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry p-2 log-${type}`;
+                logEntry.innerHTML = `<span class="text-stone-400">[${now.toLocaleTimeString()}]</span> ${message}`;
+                logContainer.appendChild(logEntry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            async function getAccessToken() {
+                const tokenUrl = 'https://labsys.frc.utn.edu.ar/aim/realms/backend-tps/protocol/openid-connect/token';
+                const params = new URLSearchParams();
+                params.append('grant_type', 'password');
+                params.append('client_id', 'cliente-tpi');
+                params.append('client_secret', 'ZmiMMce6zh4xKHde1FFKbfkiThDyYpyn');
+                params.append('username', usernameInput.value);
+                params.append('password', passwordInput.value);
+
+                log('Solicitando token de acceso a Keycloak...', 'info');
+                try {
+                    const response = await fetch(tokenUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        accessToken = data.access_token;
+                        tokenDisplay.value = `Token obtenido. Sensor listo para activar.`;
+                        log('Token obtenido.', 'success');
+                        toggleBtn.disabled = false;
+                    } else {
+                        accessToken = null;
+                        tokenDisplay.value = `Error: ${data.error_description || 'Credenciales inválidas.'}`;
+                        log(`Error al obtener token: ${data.error_description}`, 'error');
+                        toggleBtn.disabled = true;
+                    }
+                } catch (error) {
+                    accessToken = null;
+                    tokenDisplay.value = 'Error de red al conectar con Keycloak.';
+                    log(`Error de red con Keycloak: ${error.message}`, 'error');
+                    toggleBtn.disabled = true;
+                }
+            }
+            
+            async function sendPosition() {
+                if (!accessToken) {
+                    log('Error: Token no disponible.', 'error');
+                    stopSensor();
+                    return;
+                }
+                vehicle.lat += (Math.random() - 0.5) * 0.005; 
+                vehicle.lon += (Math.random() - 0.5) * 0.005;
+                updateDisplay();
+
+                const postData = {
+                    vehiculo: { id: vehicle.id },
+                    coordenadas: { lat: vehicle.lat, lon: vehicle.lon }
+                };
+
+                 // --- LÍNEAS DE DEPURACIÓN ---
+                console.log('Valores actuales del objeto vehicle:', vehicle);
+                console.log('Payload JSON que se enviará:', JSON.stringify(postData, null, 2));
+                // - LÍNEAS DE DEPURACIÓN -
+
+                log(`Enviando POST a ${apiUrlInput.value}...`, 'info');
+
+                try {
+                    const response = await fetch(apiUrlInput.value, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}`
+                        },
+                        body: JSON.stringify(postData),
+                    });
+                    
+                    if (response.status === 401) {
+                         log(`Error (401): Token inválido. Obtén uno nuevo.`, 'error');
+                         stopSensor();
+                         return;
+                    }
+                    
+                    const responseText = await response.text();
+                    
+                    if (response.ok) {
+                        const responseData = JSON.parse(responseText);
+                        const message = responseData.mensaje || JSON.stringify(responseData);
+                        log(`Éxito (${response.status}): ${message} Posición enviada.`, 'success');
+                    } else {
+                        log(`Error (${response.status}): ${responseText}`, 'error');
+                    }
+                } catch (error) {
+                    log(`Error de red: ${error.message}`, 'error');
+                }
+            }
+            
+            function stopSensor() {
+                isSensorActive = false;
+                toggleBtn.textContent = '2. Activar Sensor';
+                toggleBtn.classList.remove('bg-red-600');
+                toggleBtn.classList.add('bg-green-600');
+                statusDisplay.textContent = 'APAGADO';
+                statusDisplay.classList.remove('text-green-600', 'blinking-dot');
+                statusDisplay.classList.add('text-red-600');
+                clearInterval(simulationInterval);
+            }
+
+            toggleBtn.addEventListener('click', function(event) {
+                event.preventDefault(); // Alternativa a type="button"
+                isSensorActive = !isSensorActive;
+                if (isSensorActive) {
+                    toggleBtn.textContent = 'Apagar Sensor';
+                    toggleBtn.classList.remove('bg-green-600');
+                    toggleBtn.classList.add('bg-red-600');
+                    statusDisplay.textContent = 'ENCENDIDO';
+                    statusDisplay.classList.add('text-green-600', 'blinking-dot');
+                    
+                    vehicle.id = parseInt(vehicleIdInput.value, 10) || 1;
+                    vehicle.lat = config.ubicacion_agencia.latitud;
+                    vehicle.lon = config.ubicacion_agencia.longitud;
+                    log(`Sensor activado para vehículo ID: ${vehicle.id}.`, 'info');
+                    sendPosition();
+                    simulationInterval = setInterval(sendPosition, 5000);
+                } else {
+                    stopSensor();
+                    log('Sensor apagado.', 'info');
+                }
+            });
+            
+            getTokenBtn.addEventListener('click', function(event) {
+                //event.preventDefault(); // <-- BUENA PRÁCTICA
+                getAccessToken();
+            });
+            
+            initMap();
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
