@@ -3,6 +3,7 @@ package org.example.service;
 import org.example.dtos.PosicionDto;
 import org.example.dtos.externos.RestriccionesDto;
 import org.example.models.Posicion;
+import org.example.models.Prueba;
 import org.example.models.Vehiculo;
 import org.example.repositories.PosicionRepository;
 import org.example.repositories.PruebaRepository;
@@ -71,6 +72,8 @@ public class VehiculoService {
                     if (estaPosicionFueraRadioAdmitido(posicionRespuesta, restricciones)){
                         posicionRespuesta.setMensaje("La posicion actual del vehiculo se encuentra por fuera del radio permitido por la agencia.");
 
+                        marcarIncidenteEnPruebaActiva(posicionRespuesta.getVehiculo().getId());
+
                         //KAFKA ASINCRONO,
                         //permite que siga funcionando sin depedner de que reciba la notificacion el cliente
                         // en especial agregue esto porque no esta el kafka cliente
@@ -83,6 +86,7 @@ public class VehiculoService {
 
                     if (estaEnZonaRestringida(posicionRespuesta, restricciones)){
                         posicionRespuesta.setMensaje("La posicion actual del vehiculo se encuentra dentro de un area restringida.");
+                        marcarIncidenteEnPruebaActiva(posicionRespuesta.getVehiculo().getId());
                         Mono.fromRunnable(() -> kafkaProducer.enviarMensajeZonaPeligrosa(posicionRespuesta))
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .subscribe();
@@ -186,6 +190,14 @@ public class VehiculoService {
 
         //Finalmente, multiplica ese ángulo (en radianes) por el radio de la Tierra. El resultado es la distancia real sobre la superficie en la misma unidad que el radio
         return RADIO_TERRESTRE_METROS * c;
+    }
+
+    private void marcarIncidenteEnPruebaActiva(Integer idVehiculo) {
+        Prueba prueba = pruebaRepository.findPruebaActivaByVehiculoId(idVehiculo);
+        if (prueba != null && (prueba.getIncidente() == null || !prueba.getIncidente())) {
+            prueba.setIncidente(true);
+            pruebaRepository.save(prueba);
+        }
     }
 
 }

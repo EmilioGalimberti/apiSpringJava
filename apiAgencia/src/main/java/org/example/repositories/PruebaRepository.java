@@ -57,4 +57,7 @@ public interface PruebaRepository extends JpaRepository<Prueba, Integer> {
     List<Prueba> findByIncidenteTrueAndEmpleado_Legajo(Long legajo);
 
     List<Prueba> findAllByVehiculo_Id(Integer vehiculoId);
+
+    @Query("SELECT p FROM Prueba p WHERE p.vehiculo.id = :idVehiculo AND p.fechaHoraFin IS NULL")
+    Prueba findPruebaActivaByVehiculoId(@Param("idVehiculo") Integer idVehiculo);
 }
