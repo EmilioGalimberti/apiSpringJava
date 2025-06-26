@@ -56,7 +56,7 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
-      - ./agencia-para-reportes.db:/app/agencia-para-reportes.db
+      - ./agencia-para-reportes.db:/agencia-para-reportes.db
     depends_on:
       - kafka
     networks:
@@ -72,7 +72,7 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
-      - ./agencia-para-reportes.db:/app/agencia-para-reportes.db
+      - ./agencia-para-reportes.db:/agencia-para-reportes.db
     depends_on:
       - kafka
     networks:
