@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación: Sistema de Gestión para Agencias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Un gris azulado muy claro */
+            color: #1e293b; /* Un azul oscuro casi negro */
+        }
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .slide-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 35px 60px -15px rgb(0 0 0 / 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tag {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .icon {
+            width: 4rem;
+            height: 4rem;
+            stroke-width: 1.5;
+        }
+        .nav-button {
+            position: fixed;
+            bottom: 2rem;
+            background-color: white;
+            color: #3b82f6;
+            border-radius: 50%;
+            width: 3.5rem;
+            height: 3.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover {
+            transform: scale(1.1);
+            background-color: #3b82f6;
+            color: white;
+        }
+        #prevBtn {
+            left: 2rem;
+        }
+        #nextBtn {
+            right: 2rem;
+        }
+    </style>
+</head>
+<body class="w-full">
+
+    <!-- Slide 1: Título -->
+    <section id="slide-1" class="slide bg-white">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-7xl font-black mb-4">
+                <span class="gradient-text">Sistema de Gestión de Agencias</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-600">Una Arquitectura de Microservicios para un Control Total</p>
+            <p class="mt-8 font-semibold">Desliza para comenzar</p>
+            <svg class="w-8 h-8 mx-auto mt-2 animate-bounce text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </div>
+    </section>
+
+    <!-- Slide 2: Visión General -->
+    <section id="slide-2" class="slide">
+        <div class="text-center max-w-4xl">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">La Visión General del Proyecto</h2>
+            <p class="text-lg md:text-xl mb-8 text-slate-700">Mi proyecto no es una sola aplicación, sino un ecosistema de servicios especializados que colaboran entre sí. Esto se conoce como...</p>
+            <h3 class="text-5xl md:text-6xl font-black gradient-text">Arquitectura de Microservicios</h3>
+            <p class="mt-8 text-lg text-slate-600">En vez de un programa gigante, dividimos el sistema en partes pequeñas e independientes. Esto lo hace más <strong class="text-blue-600">robusto</strong>, <strong class="text-purple-600">escalable</strong> y <strong class="text-indigo-600">fácil de mantener</strong>.</p>
+        </div>
+    </section>
+
+    <!-- Slide 3: Los Microservicios -->
+    <section id="slide-3" class="slide">
+        <div class="text-center w-full max-w-6xl">
+            <h2 class="text-4xl md:text-5xl font-bold mb-12">El Equipo de Especialistas</h2>
+            <div class="grid md:grid-cols-3 gap-8 text-left">
+                <!-- Card: Gateway -->
+                <div class="card">
+                    <div class="flex items-center gap-4 mb-4">
+                        <svg class="icon text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.016h-.008v-.016z" /></svg>
+                        <div>
+                            <h3 class="text-2xl font-bold">Gateway</h3>
+                            <p class="font-semibold gradient-text">El Portero</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-600">La puerta de entrada. Controla el acceso y redirige cada solicitud al servicio correcto. Su misión principal es la <strong class="text-red-600">seguridad</strong>.</p>
+                </div>
+                <!-- Card: API Agencia -->
+                <div class="card">
+                    <div class="flex items-center gap-4 mb-4">
+                        <svg class="icon text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 16.5V21m3.75-18v1.5m0 16.5V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V8.25a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 8.25v10.5A2.25 2.25 0 006.75 21z" /></svg>
+                        <div>
+                            <h3 class="text-2xl font-bold">API Agencia</h3>
+                            <p class="font-semibold gradient-text">El Cerebro</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-600">El núcleo de la operación. Gestiona vehículos, empleados, pruebas de manejo y toda la lógica de negocio.</p>
+                </div>
+                <!-- Card: API Notificaciones -->
+                <div class="card">
+                    <div class="flex items-center gap-4 mb-4">
+                        <svg class="icon text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                        <div>
+                            <h3 class="text-2xl font-bold">API Notificaciones</h3>
+                            <p class="font-semibold gradient-text">El Mensajero</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-600">Recibe órdenes de alerta y envía notificaciones por SMS a los responsables. Simple, rápido y eficaz.</p>
+                </div>
+            </div>
+             <div class="mt-12 text-center">
+                <p class="text-lg text-slate-600">Y para que hablen entre sí de forma asíncrona, usamos...</p>
+                <h4 class="text-3xl font-bold mt-2">KAFKA <span class="text-purple-500">(El Sistema Nervioso)</span></h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: El Cerebro - API Agencia -->
+    <section id="slide-4" class="slide">
+        <div class="w-full max-w-6xl">
+            <h2 class="text-center text-4xl md:text-5xl font-bold mb-12">Paso 2: El Cerebro <span class="gradient-text">API-Agencia</span></h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-3xl font-bold mb-6">A. ¿Qué hace? (Funcionalidades)</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3"><span class="tag mt-1">Pruebas</span><p class="text-slate-700"><strong>Gestión de Pruebas de Manejo:</strong> Crea, finaliza y lista pruebas, con validaciones clave como la vigencia de la licencia del interesado.</p></li>
+                        <li class="flex items-start gap-3"><span class="tag mt-1">GPS</span><p class="text-slate-700"><strong>Seguimiento de Vehículos:</strong> Procesa posiciones GPS, evalúa si salen del radio permitido o entran a zonas peligrosas y publica eventos en Kafka.</p></li>
+                        <li class="flex items-start gap-3"><span class="tag mt-1">Reportes</span><p class="text-slate-700"><strong>Generación de Reportes:</strong> Crea informes en texto plano sobre incidentes, KMs recorridos y más.</p></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="text-3xl font-bold mb-6">B. ¿Cómo se organiza?</h3>
+                     <ul class="space-y-4">
+                        <li class="flex items-start gap-3"><span class="tag mt-1 bg-green-100 text-green-800">Models</span><p class="font-mono text-slate-700 bg-slate-100 p-2 rounded-md">Clases como <code>Vehiculo.java</code>, <code>Prueba.java</code>. Son las plantillas de los datos.</p></li>
+                        <li class="flex items-start gap-3"><span class="tag mt-1 bg-yellow-100 text-yellow-800">Repositories</span><p class="font-mono text-slate-700 bg-slate-100 p-2 rounded-md">Interfaces que hablan con la BD, como <code>PruebaRepository</code>.</p></li>
+                        <li class="flex items-start gap-3"><span class="tag mt-1 bg-blue-100 text-blue-800">Services</span><p class="font-mono text-slate-700 bg-slate-100 p-2 rounded-md"><code>PruebaService.java</code>. Aquí vive la lógica de negocio compleja.</p></li>
+                        <li class="flex items-start gap-3"><span class="tag mt-1 bg-purple-100 text-purple-800">Controllers</span><p class="font-mono text-slate-700 bg-slate-100 p-2 rounded-md"><code>PruebaController.java</code>. Expone la lógica como una API REST.</p></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: El Mensajero - API Notificaciones -->
+    <section id="slide-5" class="slide">
+        <div class="text-center max-w-4xl">
+            <h2 class="text-4xl md:text-5xl font-bold mb-12">Paso 3: El Mensajero <span class="gradient-text">API-Notificaciones</span></h2>
+            <p class="text-lg md:text-xl mb-8 text-slate-700">Este servicio tiene un propósito muy claro y realiza un flujo de trabajo simple y eficiente:</p>
+            <ol class="space-y-6 text-left max-w-md mx-auto">
+                <li class="flex items-center gap-4"><span class="flex items-center justify-center w-12 h-12 bg-blue-500 text-white font-bold text-2xl rounded-full">1</span><p class="text-xl"><strong>Escucha a Kafka</strong> constantemente.</p></li>
+                <li class="flex items-center gap-4"><span class="flex items-center justify-center w-12 h-12 bg-blue-500 text-white font-bold text-2xl rounded-full">2</span><p class="text-xl">Cuando llega una alerta, la <strong>guarda</strong> en la base de datos.</p></li>
+                <li class="flex items-center gap-4"><span class="flex items-center justify-center w-12 h-12 bg-blue-500 text-white font-bold text-2xl rounded-full">3</span><p class="text-xl">Utiliza <strong>Twilio</strong> para enviar un <strong>SMS</strong> de alerta.</p></li>
+            </ol>
+             <p class="mt-12 text-lg text-slate-600">También puede enviar notificaciones de promociones de forma manual.</p>
+        </div>
+    </section>
+
+    <!-- Slide 6: El Portero - Gateway -->
+    <section id="slide-6" class="slide">
+        <div class="w-full max-w-6xl">
+            <h2 class="text-center text-4xl md:text-5xl font-bold mb-12">Paso 4: El Portero <span class="gradient-text">Gateway</span></h2>
+             <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-3xl font-bold mb-6">Enrutamiento</h3>
+                    <p class="text-slate-700">Define reglas simples para dirigir el tráfico. El cliente solo necesita conocer una dirección.</p>
+                    <div class="mt-4 p-4 bg-slate-800 text-white rounded-lg font-mono text-sm">
+                        <p><span class="text-yellow-400">/api/pruebas/**</span> &rarr; <span class="text-cyan-400">api-agencia</span></p>
+                        <p><span class="text-yellow-400">/api/vehiculos/**</span> &rarr; <span class="text-cyan-400">api-agencia</span></p>
+                        <p><span class="text-yellow-400">/api/notificaciones/**</span> &rarr; <span class="text-cyan-400">api-notificaciones</span></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="text-3xl font-bold mb-6">Seguridad</h3>
+                    <p class="text-slate-700">¡La parte más crítica! Se conecta con <strong>Keycloak</strong> para:</p>
+                     <ul class="mt-4 space-y-2 list-disc list-inside text-slate-700">
+                        <li>Proteger los endpoints según el rol (<code class="tag">ADMIN</code>, <code class="tag">EMPLEADO</code>).</li>
+                        <li>Validar los tokens de acceso en CADA solicitud.</li>
+                        <li>Si el token es inválido o el rol incorrecto, rechaza la petición en la puerta.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 7: Interfaz y Resumen -->
+     <section id="slide-7" class="slide">
+        <div class="w-full max-w-6xl">
+            <h2 class="text-center text-4xl md:text-5xl font-bold mb-12">Paso 5: La Interfaz y el Resumen</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-3xl font-bold mb-6">La Interfaz de Usuario</h3>
+                    <p class="text-slate-700">Para interactuar y demostrar el sistema, creé interfaces sencillas en HTML:</p>
+                    <ul class="mt-4 space-y-2 list-disc list-inside text-slate-700">
+                        <li><code class="font-mono bg-slate-100 p-1 rounded">principal.html</code>: Panel de administración para operaciones CRUD.</li>
+                         <li><code class="font-mono bg-slate-100 p-1 rounded">simuladorDePosiciones.html</code>: ¡La estrella de la demo! Simula ser un GPS de vehículo para probar el flujo de alertas en vivo.</li>
+                    </ul>
+                </div>
+                <div class="card bg-slate-800 text-white">
+                    <h3 class="text-3xl font-bold mb-6 text-blue-400">Resumen para tu Exposición</h3>
+                    <ul class="mt-4 space-y-3 list-decimal list-inside">
+                        <li>"Mi proyecto usa una arquitectura de microservicios en Java y Spring Boot."</li>
+                        <li>"Está compuesto por 3 servicios: agencia (cerebro), notificaciones (mensajero) y un gateway (seguridad)."</li>
+                        <li>"El servicio de agencia detecta incidentes y publica eventos en Kafka, desacoplando la lógica."</li>
+                        <li>"El servicio de notificaciones escucha a Kafka y envía alertas por SMS con Twilio."</li>
+                        <li>"El gateway centraliza la seguridad con Spring Security y OAuth2, protegiendo todos los endpoints."</li>
+                        <li>"Con mi simulador, puedo demostrar el flujo completo en tiempo real."</li>
+                    </ul>
+                </div>
+            </div>
+             <p class="mt-12 text-center text-xl font-bold">¡Estás listo para exponer!</p>
+        </div>
+    </section>
+
+    <!-- Botones de Navegación -->
+    <div id="prevBtn" class="nav-button opacity-0 transition-opacity">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
+    </div>
+    <div id="nextBtn" class="nav-button">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            let currentSlide = 0;
+
+            // Observer para animar las slides al entrar en la vista
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('slide-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            slides.forEach(slide => observer.observe(slide));
+            
+            // Función para actualizar el slide actual y los botones
+            const updateSlide = (index) => {
+                if (index >= 0 && index < slides.length) {
+                    currentSlide = index;
+                    slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Actualizar visibilidad de botones
+                    prevBtn.style.opacity = currentSlide === 0 ? '0' : '1';
+                    nextBtn.style.opacity = currentSlide === slides.length - 1 ? '0' : '1';
+                }
+            };
+            
+            // Event Listeners para botones
+            prevBtn.addEventListener('click', () => updateSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => updateSlide(currentSlide + 1));
+            
+            // Actualizar slide actual al hacer scroll manual
+            const scrollObserver = new IntersectionObserver((entries) => {
+                 entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                       const slideIndex = Array.from(slides).indexOf(entry.target);
+                       currentSlide = slideIndex;
+                       prevBtn.style.opacity = currentSlide === 0 ? '0' : '1';
+                       nextBtn.style.opacity = currentSlide === slides.length - 1 ? '0' : '1';
+                    }
+                });
+            }, {threshold: 0.5});
+
+            slides.forEach(slide => scrollObserver.observe(slide));
+        });
+    </script>
+</body>
+</html>
