@@ -8,6 +8,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="tpJavaSpringBackEnd" />
+        <module name="gateway" />
+        <module name="notificaciones" />
       </profile>
     </annotationProcessing>
   </component>
